@@ -518,15 +518,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         updateSystemBarColors();
 
         callingUserPhotoView = fragmentView.findViewById(R.id.callingUserPhotoView);
-        callingUserTextureView = new VoIPTextureView(context, false, true, false, false);
+        callingUserTextureView = fragmentView.findViewById(R.id.callingUserTextureView);
+        callingUserTextureView.init(false, true, false, false);
         callingUserTextureView.renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
         callingUserTextureView.renderer.setEnableHardwareScaler(true);
         callingUserTextureView.renderer.setRotateTextureWithScreen(true);
         callingUserTextureView.scaleType = VoIPTextureView.SCALE_TYPE_FIT;
-        //     callingUserTextureView.attachBackgroundRenderer();
-
-        pinchZoomLayout.addView(callingUserTextureView);
-
 
         final BackgroundGradientDrawable gradientDrawable = new BackgroundGradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xFF1b354e, 0xFF255b7d});
         final BackgroundGradientDrawable.Sizes sizes = BackgroundGradientDrawable.Sizes.ofDeviceScreen(BackgroundGradientDrawable.Sizes.Orientation.PORTRAIT);

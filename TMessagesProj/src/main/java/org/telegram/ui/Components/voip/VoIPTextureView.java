@@ -11,6 +11,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
+import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
@@ -23,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -41,16 +45,16 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 public class VoIPTextureView extends FrameLayout {
-    final boolean isCamera;
-    final boolean applyRotation;
+    boolean isCamera;
+    boolean applyRotation;
 
     float roundRadius;
 
     private boolean screencast;
 
-    public final TextureViewRenderer renderer;
+    public TextureViewRenderer renderer;
     public TextureView blurRenderer;
-    public final ImageView imageView;
+    public ImageView imageView;
     public View backgroundView;
     private FrameLayout screencastView;
     private ImageView screencastImage;
@@ -98,12 +102,34 @@ public class VoIPTextureView extends FrameLayout {
     boolean clipToTexture;
     public float animationProgress;
 
+    public VoIPTextureView(@NonNull Context context) {
+        super(context);
+    }
+
+    public VoIPTextureView(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public VoIPTextureView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public VoIPTextureView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
     public VoIPTextureView(@NonNull Context context, boolean isCamera, boolean applyRotation) {
         this(context, isCamera, applyRotation, true, false);
     }
 
     public VoIPTextureView(@NonNull Context context, boolean isCamera, boolean applyRotation, boolean applyRoundRadius, boolean blurBackground) {
         super(context);
+        init(isCamera, applyRotation, applyRoundRadius, blurBackground);
+    }
+
+    public void init(boolean isCamera, boolean applyRotation, boolean applyRoundRadius, boolean blurBackground) {
+        Context context = getContext();
         this.isCamera = isCamera;
         this.applyRotation = applyRotation;
         imageView = new ImageView(context);

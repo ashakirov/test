@@ -12,7 +12,12 @@
         <org.telegram.ui.Call.CallingUserPhotoView
             android:id="@+id/callingUserPhotoView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
+
+        <org.telegram.ui.Components.voip.VoIPTextureView
+            android:id="@+id/callingUserTextureView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </org.telegram.ui.Call.VoIPPinchZoomFrameLayout>
 
 </org.telegram.ui.Call.ColoredInsetFrameLayout>
