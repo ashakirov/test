@@ -17,7 +17,12 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build.VERSION_CODES;
+import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
@@ -40,6 +45,26 @@ public class BackupImageView extends View {
 
     public BackupImageView(Context context) {
         super(context);
+        init();
+    }
+
+    public BackupImageView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public BackupImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public BackupImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init();
+    }
+
+    private void init() {
         imageReceiver = new ImageReceiver(this);
 
         imageReceiver.setDelegate((imageReceiver1, set, thumb, memCache) -> {

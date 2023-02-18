@@ -517,16 +517,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
         updateSystemBarColors();
 
-        callingUserPhotoView = new BackupImageView(context) {
-
-            int blackoutColor = ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.3f));
-
-            @Override
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-                canvas.drawColor(blackoutColor);
-            }
-        };
+        callingUserPhotoView = fragmentView.findViewById(R.id.callingUserPhotoView);
         callingUserTextureView = new VoIPTextureView(context, false, true, false, false);
         callingUserTextureView.renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
         callingUserTextureView.renderer.setEnableHardwareScaler(true);
@@ -534,7 +525,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserTextureView.scaleType = VoIPTextureView.SCALE_TYPE_FIT;
         //     callingUserTextureView.attachBackgroundRenderer();
 
-        pinchZoomLayout.addView(callingUserPhotoView);
         pinchZoomLayout.addView(callingUserTextureView);
 
 
