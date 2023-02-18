@@ -7,14 +7,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -29,12 +26,13 @@ import org.telegram.ui.GroupCallActivity;
 
 public class VoIPPinchZoomFrameLayout extends FrameLayout {
 
+    private int backgroundColor = 0xff000000;
+
     public interface CallBackgroundViewCallback {
         void onTap(long time);
         VoIPTextureView getFullscreenTextureView();
     }
 
-    /* === pinch to zoom === */
     private float pinchStartCenterX;
     private float pinchStartCenterY;
     private float pinchStartDistance;
@@ -51,12 +49,8 @@ public class VoIPPinchZoomFrameLayout extends FrameLayout {
     private boolean zoomStarted;
     private boolean canZoomGesture;
     private ValueAnimator zoomBackAnimator;
-    /* === pinch to zoom === */
 
     private float touchSlop;
-    private Paint overlayPaint;
-    private Paint overlayBottomPaint;
-    private WindowInsets lastInsets;
     private CallBackgroundViewCallback callback;
 
     public VoIPPinchZoomFrameLayout(@NonNull Context context) {
@@ -84,19 +78,7 @@ public class VoIPPinchZoomFrameLayout extends FrameLayout {
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setClipToPadding(false);
         setClipChildren(false);
-        setBackgroundColor(0xff000000);
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH && lastInsets != null) {
-            canvas.drawRect(0, 0, getMeasuredWidth(), lastInsets.getSystemWindowInsetTop(), overlayPaint);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH && lastInsets != null) {
-            canvas.drawRect(0, getMeasuredHeight() - lastInsets.getSystemWindowInsetBottom(), getMeasuredWidth(), getMeasuredHeight(), overlayBottomPaint);
-        }
+        setBackgroundColor(backgroundColor);
     }
 
     float pressedX;
@@ -214,23 +196,14 @@ public class VoIPPinchZoomFrameLayout extends FrameLayout {
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        /*if (child == callingUserPhotoView && (currentUserIsVideo || callingUserIsVideo)) {
-            return false;
+        if (zoomStarted || zoomBackAnimator != null) {
+            canvas.save();
+            canvas.scale(pinchScale, pinchScale, pinchCenterX, pinchCenterY);
+            canvas.translate(pinchTranslationX, pinchTranslationY);
+            boolean b = super.drawChild(canvas, child, drawingTime);
+            canvas.restore();
+            return b;
         }
-        if (
-                child == callingUserPhotoView ||
-                        child == callingUserTextureView ||
-                        (child == currentUserCameraFloatingLayout && currentUserCameraIsFullscreen)
-        ) { */
-            if (zoomStarted || zoomBackAnimator != null) {
-                canvas.save();
-                canvas.scale(pinchScale, pinchScale, pinchCenterX, pinchCenterY);
-                canvas.translate(pinchTranslationX, pinchTranslationY);
-                boolean b = super.drawChild(canvas, child, drawingTime);
-                canvas.restore();
-                return b;
-            }
-       // }
         return super.drawChild(canvas, child, drawingTime);
     }
 
@@ -279,18 +252,6 @@ public class VoIPPinchZoomFrameLayout extends FrameLayout {
         }
         canZoomGesture = false;
         isInPinchToZoomTouchMode = false;
-    }
-
-    public void setOverlayPaint(Paint overlayPaint){
-        this.overlayPaint = overlayPaint;
-    }
-
-    public void setOverlayBottomPaint(Paint overlayBottomPaint){
-        this.overlayBottomPaint = overlayBottomPaint;
-    }
-
-    public void setInsets(WindowInsets insets){
-        this.lastInsets = insets;
     }
 
     public void setCallback(CallBackgroundViewCallback callback){

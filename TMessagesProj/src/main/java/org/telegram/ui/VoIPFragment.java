@@ -68,6 +68,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.DarkAlertDialog;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Call.ColoredInsetFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
 import org.telegram.ui.Components.AlertsCreator;
@@ -110,7 +111,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     VoIPToggleButton[] bottomButtons = new VoIPToggleButton[4];
 
-    private ViewGroup fragmentView;
+    private ColoredInsetFrameLayout fragmentView;
     private VoIPOverlayBackground overlayBackground;
 
     private BackupImageView callingUserPhotoView;
@@ -122,7 +123,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private ImageView backIcon;
     private ImageView speakerPhoneIcon;
 
-    VoIPPinchZoomFrameLayout frameLayout;
+    VoIPPinchZoomFrameLayout pinchZoomLayout;
     LinearLayout emojiLayout;
     TextView emojiRationalTextView;
     ImageView[] emojiViews = new ImageView[4];
@@ -388,7 +389,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         ((FrameLayout.LayoutParams) bottomShadow.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
         currentUserCameraFloatingLayout.setInsets(lastInsets);
         callingUserMiniFloatingLayout.setInsets(lastInsets);
-        frameLayout.setInsets(lastInsets);
+        fragmentView.setInsets(lastInsets);
         fragmentView.requestLayout();
         if (previewDialog != null) {
             previewDialog.setBottomPadding(lastInsets.getSystemWindowInsetBottom());
@@ -489,12 +490,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     public View createView(Context context, ViewGroup parent) {
         accessibilityManager = ContextCompat.getSystemService(context, AccessibilityManager.class);
-        View rootView = LayoutInflater.from(context).inflate(R.layout.screen_voip, parent, false);
+        fragmentView = (ColoredInsetFrameLayout) LayoutInflater.from(context).inflate(R.layout.screen_voip, parent, false);
+        fragmentView.setOverlayPaint(overlayPaint);
+        fragmentView.setOverlayBottomPaint(overlayBottomPaint);
 
-        frameLayout = rootView.findViewById(R.id.call_root);
-        frameLayout.setOverlayPaint(overlayPaint);
-        frameLayout.setOverlayBottomPaint(overlayBottomPaint);
-        frameLayout.setCallback(new CallBackgroundViewCallback() {
+        pinchZoomLayout = fragmentView.findViewById(R.id.pinch_zoom_view);
+        pinchZoomLayout.setCallback(new CallBackgroundViewCallback() {
             @Override
             public void onTap(long time) {
                 if (time - lastContentTapTime > 300) {
@@ -515,8 +516,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         });
         updateSystemBarColors();
-        fragmentView = frameLayout;
-        frameLayout.setFitsSystemWindows(true);
+
         callingUserPhotoView = new BackupImageView(context) {
 
             int blackoutColor = ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.3f));
@@ -534,8 +534,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserTextureView.scaleType = VoIPTextureView.SCALE_TYPE_FIT;
         //     callingUserTextureView.attachBackgroundRenderer();
 
-        frameLayout.addView(callingUserPhotoView);
-        frameLayout.addView(callingUserTextureView);
+        pinchZoomLayout.addView(callingUserPhotoView);
+        pinchZoomLayout.addView(callingUserTextureView);
 
 
         final BackgroundGradientDrawable gradientDrawable = new BackgroundGradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xFF1b354e, 0xFF255b7d});
@@ -607,18 +607,18 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
         callingUserMiniFloatingLayout.setVisibility(View.GONE);
 
-        frameLayout.addView(currentUserCameraFloatingLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
-        frameLayout.addView(callingUserMiniFloatingLayout);
-        frameLayout.addView(overlayBackground);
+        pinchZoomLayout.addView(currentUserCameraFloatingLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+        fragmentView.addView(callingUserMiniFloatingLayout);
+        fragmentView.addView(overlayBackground);
 
 
         bottomShadow = new View(context);
         bottomShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{Color.TRANSPARENT, ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.5f))}));
-        frameLayout.addView(bottomShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140, Gravity.BOTTOM));
+        fragmentView.addView(bottomShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140, Gravity.BOTTOM));
 
         topShadow = new View(context);
         topShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)), Color.TRANSPARENT}));
-        frameLayout.addView(topShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140, Gravity.TOP));
+        fragmentView.addView(topShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140, Gravity.TOP));
 
 
         emojiLayout = new LinearLayout(context) {
@@ -708,10 +708,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         statusLayout.setClipToPadding(false);
         statusLayout.setPadding(0, 0, 0, AndroidUtilities.dp(15));
 
-        frameLayout.addView(callingUserPhotoViewMini, LayoutHelper.createFrame(135, 135, Gravity.CENTER_HORIZONTAL, 0, 68, 0, 0));
-        frameLayout.addView(statusLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 68, 0, 0));
-        frameLayout.addView(emojiLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 17, 0, 0));
-        frameLayout.addView(emojiRationalTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 24, 32, 24, 0));
+        fragmentView.addView(callingUserPhotoViewMini, LayoutHelper.createFrame(135, 135, Gravity.CENTER_HORIZONTAL, 0, 68, 0, 0));
+        fragmentView.addView(statusLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 68, 0, 0));
+        fragmentView.addView(emojiLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 17, 0, 0));
+        fragmentView.addView(emojiRationalTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 24, 32, 24, 0));
 
         buttonsLayout = new VoIPButtonsLayout(context);
         for (int i = 0; i < 4; i++) {
@@ -762,15 +762,15 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
         acceptDeclineView.setScreenWasWakeup(screenWasWakeup);
 
-        frameLayout.addView(buttonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
-        frameLayout.addView(acceptDeclineView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 186, Gravity.BOTTOM));
+        fragmentView.addView(buttonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
+        fragmentView.addView(acceptDeclineView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 186, Gravity.BOTTOM));
 
         backIcon = new ImageView(context);
         backIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));
         backIcon.setImageResource(R.drawable.ic_ab_back);
         backIcon.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16));
         backIcon.setContentDescription(LocaleController.getString("Back", R.string.Back));
-        frameLayout.addView(backIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.LEFT));
+        fragmentView.addView(backIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.LEFT));
 
         speakerPhoneIcon = new ImageView(context) {
             @Override
@@ -787,7 +787,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         speakerPhoneIcon.setContentDescription(LocaleController.getString("VoipSpeaker", R.string.VoipSpeaker));
         speakerPhoneIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));
         speakerPhoneIcon.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12));
-        frameLayout.addView(speakerPhoneIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.RIGHT));
+        fragmentView.addView(speakerPhoneIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.RIGHT));
         speakerPhoneIcon.setOnClickListener(view -> {
             if (speakerPhoneIcon.getTag() == null) {
                 return;
@@ -812,11 +812,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             previousState = currentState;
             updateViewState();
         });
-        frameLayout.addView(notificationsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 200, Gravity.BOTTOM, 16, 0, 16, 0));
+        fragmentView.addView(notificationsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 200, Gravity.BOTTOM, 16, 0, 16, 0));
 
         tapToVideoTooltip = new HintView(context, 4);
         tapToVideoTooltip.setText(LocaleController.getString("TapToTurnCamera", R.string.TapToTurnCamera));
-        frameLayout.addView(tapToVideoTooltip, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 19, 0, 19, 8));
+        fragmentView.addView(tapToVideoTooltip, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 19, 0, 19, 8));
         tapToVideoTooltip.setBottomOffset(AndroidUtilities.dp(4));
         tapToVideoTooltip.setVisibility(View.GONE);
 
@@ -830,7 +830,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             initRenderers();
         }
 
-        return frameLayout;
+        return fragmentView;
     }
 
     private VoIPTextureView getFullscreenTextureView() {
