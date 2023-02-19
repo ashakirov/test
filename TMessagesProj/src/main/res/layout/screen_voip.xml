@@ -99,4 +99,16 @@
             android:textSize="24dp" />
 
     </org.telegram.ui.Call.VoIPStatusLayout>
+
+    <LinearLayout
+        android:id="@+id/emojiLayout"
+        android:orientation="horizontal"
+        android:clipToPadding="false"
+        android:paddingBottom="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="6dp" />
+
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

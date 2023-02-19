@@ -30,6 +30,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -596,16 +597,14 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         topShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)), Color.TRANSPARENT}));
 
 
-        emojiLayout = new LinearLayout(context) {
+        emojiLayout = fragmentView.findViewById(R.id.emojiLayout);
+        emojiLayout.setAccessibilityDelegate(new AccessibilityDelegate(){
             @Override
-            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-                super.onInitializeAccessibilityNodeInfo(info);
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
                 info.setVisibleToUser(emojiLoaded);
             }
-        };
-        emojiLayout.setOrientation(LinearLayout.HORIZONTAL);
-        emojiLayout.setPadding(0, 0, 0, AndroidUtilities.dp(30));
-        emojiLayout.setClipToPadding(false);
+        });
 
         emojiLayout.setOnClickListener(view -> {
             if (System.currentTimeMillis() - lastContentTapTime < 500) {
@@ -645,7 +644,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         ViewCompat.setImportantForAccessibility(statusTextView, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         statusLayout.addView(statusTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 6));
 
-        fragmentView.addView(emojiLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 17, 0, 0));
         fragmentView.addView(emojiRationalTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 24, 32, 24, 0));
 
         buttonsLayout = new VoIPButtonsLayout(context);
