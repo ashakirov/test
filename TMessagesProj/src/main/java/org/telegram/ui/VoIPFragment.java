@@ -659,10 +659,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         statusLayout.setFocusable(true);
         statusLayout.setFocusableInTouchMode(true);
 
-        callingUserPhotoViewMini = new BackupImageView(context);
+        callingUserPhotoViewMini = fragmentView.findViewById(R.id.callingUserPhotoViewMini);
         callingUserPhotoViewMini.setImage(ImageLocation.getForUserOrChat(callingUser, ImageLocation.TYPE_SMALL), null, Theme.createCircleDrawable(AndroidUtilities.dp(135), 0xFF000000), callingUser);
         callingUserPhotoViewMini.setRoundRadius(AndroidUtilities.dp(135) / 2);
-        callingUserPhotoViewMini.setVisibility(View.GONE);
 
         callingUserTitle = new TextView(context);
         callingUserTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
@@ -683,7 +682,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         statusLayout.setClipToPadding(false);
         statusLayout.setPadding(0, 0, 0, AndroidUtilities.dp(15));
 
-        fragmentView.addView(callingUserPhotoViewMini, LayoutHelper.createFrame(135, 135, Gravity.CENTER_HORIZONTAL, 0, 68, 0, 0));
         fragmentView.addView(statusLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 68, 0, 0));
         fragmentView.addView(emojiLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 17, 0, 0));
         fragmentView.addView(emojiRationalTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 24, 32, 24, 0));

@@ -67,4 +67,12 @@
         android:layout_height="140dp"
         android:layout_gravity="top"/>
 
+    <org.telegram.ui.Components.BackupImageView
+        android:id="@+id/callingUserPhotoViewMini"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="68dp"
+        android:visibility="gone"/>
+
 </org.telegram.ui.Call.ColoredInsetFrameLayout>
