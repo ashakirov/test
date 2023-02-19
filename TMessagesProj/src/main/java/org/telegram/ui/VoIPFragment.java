@@ -545,7 +545,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         callingUserPhotoView.setImage(ImageLocation.getForUserOrChat(callingUser, ImageLocation.TYPE_BIG), null, gradientDrawable, callingUser);
 
-        currentUserCameraFloatingLayout = new VoIPFloatingLayout(context);
+        currentUserCameraFloatingLayout = fragmentView.findViewById(R.id.currentUserCameraFloatingLayout);
         currentUserCameraFloatingLayout.setDelegate((progress, value) -> currentUserTextureView.setScreenshareMiniProgress(progress, value));
         currentUserCameraFloatingLayout.setRelativePosition(1f, 1f);
         currentUserCameraIsFullscreen = true;
@@ -594,7 +594,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
         callingUserMiniFloatingLayout.setVisibility(View.GONE);
 
-        pinchZoomLayout.addView(currentUserCameraFloatingLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
         fragmentView.addView(callingUserMiniFloatingLayout);
         fragmentView.addView(overlayBackground);
 

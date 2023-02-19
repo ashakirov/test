@@ -20,4 +20,11 @@
             android:layout_height="match_parent" />
     </org.telegram.ui.Call.VoIPPinchZoomFrameLayout>
 
+    <org.telegram.ui.Components.voip.VoIPFloatingLayout
+        android:id="@+id/currentUserCameraFloatingLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+    </org.telegram.ui.Components.voip.VoIPFloatingLayout>
+
 </org.telegram.ui.Call.ColoredInsetFrameLayout>
