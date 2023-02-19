@@ -120,12 +120,17 @@ public class VoIPTextureView extends FrameLayout {
     }
 
     public VoIPTextureView(@NonNull Context context, boolean isCamera, boolean applyRotation) {
-        this(context, isCamera, applyRotation, true, false);
+        super(context);
+        init(isCamera, applyRotation);
     }
 
     public VoIPTextureView(@NonNull Context context, boolean isCamera, boolean applyRotation, boolean applyRoundRadius, boolean blurBackground) {
         super(context);
         init(isCamera, applyRotation, applyRoundRadius, blurBackground);
+    }
+
+    public void init(boolean isCamera, boolean applyRotation) {
+        init(isCamera, applyRotation, true, false);
     }
 
     public void init(boolean isCamera, boolean applyRotation, boolean applyRoundRadius, boolean blurBackground) {

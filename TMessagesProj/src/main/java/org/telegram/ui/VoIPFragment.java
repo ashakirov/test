@@ -548,10 +548,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         currentUserCameraFloatingLayout = fragmentView.findViewById(R.id.currentUserCameraFloatingLayout);
         currentUserCameraFloatingLayout.setDelegate((progress, value) -> currentUserTextureView.setScreenshareMiniProgress(progress, value));
         currentUserCameraFloatingLayout.setRelativePosition(1f, 1f);
-        currentUserCameraIsFullscreen = true;
-        currentUserTextureView = new VoIPTextureView(context, true, false);
-        currentUserTextureView.renderer.setIsCamera(true);
-        currentUserTextureView.renderer.setUseCameraRotation(true);
         currentUserCameraFloatingLayout.setOnTapListener(view -> {
             if (currentUserIsVideo && callingUserIsVideo && System.currentTimeMillis() - lastContentTapTime > 500) {
                 AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
@@ -564,8 +560,13 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 updateViewState();
             }
         });
+
+        currentUserCameraIsFullscreen = true;
+        currentUserTextureView = fragmentView.findViewById(R.id.currentUserTextureView);
+        currentUserTextureView.init(true, false);
+        currentUserTextureView.renderer.setIsCamera(true);
+        currentUserTextureView.renderer.setUseCameraRotation(true);
         currentUserTextureView.renderer.setMirror(true);
-        currentUserCameraFloatingLayout.addView(currentUserTextureView);
 
         callingUserMiniFloatingLayout = new VoIPFloatingLayout(context);
         callingUserMiniFloatingLayout.alwaysFloating = true;
