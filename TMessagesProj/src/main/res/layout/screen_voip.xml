@@ -159,4 +159,13 @@
         android:layout_gravity="top|right"
         android:padding="12dp" />
 
+    <org.telegram.ui.Components.voip.VoIPNotificationsLayout
+        android:id="@+id/notificationsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:gravity="bottom" />
+
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

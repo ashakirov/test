@@ -723,13 +723,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         });
 
-        notificationsLayout = new VoIPNotificationsLayout(context);
-        notificationsLayout.setGravity(Gravity.BOTTOM);
+        notificationsLayout = fragmentView.findViewById(R.id.notificationsLayout);
         notificationsLayout.setOnViewsUpdated(() -> {
             previousState = currentState;
             updateViewState();
         });
-        fragmentView.addView(notificationsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 200, Gravity.BOTTOM, 16, 0, 16, 0));
 
         tapToVideoTooltip = new HintView(context, 4);
         tapToVideoTooltip.setText(LocaleController.getString("TapToTurnCamera", R.string.TapToTurnCamera));
