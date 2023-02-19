@@ -568,19 +568,15 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         currentUserTextureView.renderer.setUseCameraRotation(true);
         currentUserTextureView.renderer.setMirror(true);
 
-        callingUserMiniFloatingLayout = new VoIPFloatingLayout(context);
+        callingUserMiniFloatingLayout = fragmentView.findViewById(R.id.callingUserMiniFloatingLayout);
         callingUserMiniFloatingLayout.alwaysFloating = true;
         callingUserMiniFloatingLayout.setFloatingMode(true, false);
-        callingUserMiniTextureRenderer = new TextureViewRenderer(context);
+        callingUserMiniTextureRenderer = fragmentView.findViewById(R.id.callingUserMiniTextureRenderer);
         callingUserMiniTextureRenderer.setEnableHardwareScaler(true);
         callingUserMiniTextureRenderer.setIsCamera(false);
         callingUserMiniTextureRenderer.setFpsReduction(30);
         callingUserMiniTextureRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
 
-        View backgroundView = new View(context);
-        backgroundView.setBackgroundColor(0xff1b1f23);
-        callingUserMiniFloatingLayout.addView(backgroundView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-        callingUserMiniFloatingLayout.addView(callingUserMiniTextureRenderer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
         callingUserMiniFloatingLayout.setOnTapListener(view -> {
             if (cameraForceExpanded && System.currentTimeMillis() - lastContentTapTime > 500) {
                 AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
@@ -593,9 +589,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 updateViewState();
             }
         });
-        callingUserMiniFloatingLayout.setVisibility(View.GONE);
 
-        fragmentView.addView(callingUserMiniFloatingLayout);
         fragmentView.addView(overlayBackground);
 
 

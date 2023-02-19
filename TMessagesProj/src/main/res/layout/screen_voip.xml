@@ -31,4 +31,21 @@
             android:layout_height="match_parent" />
     </org.telegram.ui.Components.voip.VoIPFloatingLayout>
 
+    <org.telegram.ui.Components.voip.VoIPFloatingLayout
+        android:id="@+id/callingUserMiniFloatingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ff1b1f23" />
+
+        <org.webrtc.TextureViewRenderer
+            android:id="@+id/callingUserMiniTextureRenderer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </org.telegram.ui.Components.voip.VoIPFloatingLayout>
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

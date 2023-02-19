@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.os.Build.VERSION_CODES;
 import android.os.Looper;
+import android.util.AttributeSet;
 import android.view.TextureView;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.SharedConfig;
@@ -23,10 +26,10 @@ public class TextureViewRenderer extends TextureView
     private static final String TAG = "TextureViewRenderer";
 
     // Cached resource name.
-    private final String resourceName;
+    private String resourceName;
     private final RendererCommon.VideoLayoutMeasure videoLayoutMeasure =
             new RendererCommon.VideoLayoutMeasure();
-    private final TextureEglRenderer eglRenderer;
+    private TextureEglRenderer eglRenderer;
 
     // Callback for reporting renderer events. Read-only after initialization so no lock required.
     private RendererCommon.RendererEvents rendererEvents;
@@ -239,11 +242,31 @@ public class TextureViewRenderer extends TextureView
         }
     }
 
+    public TextureViewRenderer(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        initialize();
+    }
+
+    public TextureViewRenderer(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initialize();
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public TextureViewRenderer(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        initialize();
+    }
+
     /**
      * Standard View constructor. In order to render something, you must first call init().
      */
     public TextureViewRenderer(Context context) {
         super(context);
+        initialize();
+    }
+
+    private void initialize(){
         this.resourceName = getResourceName();
         eglRenderer = new TextureEglRenderer(resourceName);
         setSurfaceTextureListener(this);
