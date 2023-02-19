@@ -143,4 +143,13 @@
         android:layout_width="match_parent"
         android:layout_height="186dp"
         android:layout_gravity="bottom" />
+
+    <ImageView
+        android:id="@+id/backIcon"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="top|left"
+        android:padding="16dp"
+        android:src="@drawable/ic_ab_back" />
+
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

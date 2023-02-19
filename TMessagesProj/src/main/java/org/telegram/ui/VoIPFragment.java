@@ -687,12 +687,17 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
         acceptDeclineView.setScreenWasWakeup(screenWasWakeup);
 
-        backIcon = new ImageView(context);
+        backIcon = fragmentView.findViewById(R.id.backIcon);
         backIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));
-        backIcon.setImageResource(R.drawable.ic_ab_back);
-        backIcon.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16));
         backIcon.setContentDescription(LocaleController.getString("Back", R.string.Back));
-        fragmentView.addView(backIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.LEFT));
+        backIcon.setOnClickListener(view -> {
+            if (!lockOnScreen) {
+                onBackPressed();
+            }
+        });
+        if (windowView.isLockOnScreen()) {
+            backIcon.setVisibility(View.GONE);
+        }
 
         speakerPhoneIcon = new ImageView(context) {
             @Override
@@ -718,15 +723,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 VoIPService.getSharedInstance().toggleSpeakerphoneOrShowRouteSheet(activity, false);
             }
         });
-
-        backIcon.setOnClickListener(view -> {
-            if (!lockOnScreen) {
-                onBackPressed();
-            }
-        });
-        if (windowView.isLockOnScreen()) {
-            backIcon.setVisibility(View.GONE);
-        }
 
         notificationsLayout = new VoIPNotificationsLayout(context);
         notificationsLayout.setGravity(Gravity.BOTTOM);
