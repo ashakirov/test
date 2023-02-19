@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="6dp"
-            android:importantForAccessibility="noHideDescendants"/>
+            android:importantForAccessibility="noHideDescendants" />
 
     </org.telegram.ui.Call.VoIPStatusLayout>
 
@@ -151,5 +151,12 @@
         android:layout_gravity="top|left"
         android:padding="16dp"
         android:src="@drawable/ic_ab_back" />
+
+    <ImageView
+        android:id="@+id/speakerPhoneIcon"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="top|right"
+        android:padding="12dp" />
 
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

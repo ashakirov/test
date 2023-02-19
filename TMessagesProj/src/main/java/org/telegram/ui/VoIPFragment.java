@@ -699,10 +699,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             backIcon.setVisibility(View.GONE);
         }
 
-        speakerPhoneIcon = new ImageView(context) {
+        speakerPhoneIcon = fragmentView.findViewById(R.id.speakerPhoneIcon);
+        speakerPhoneIcon.setAccessibilityDelegate(new AccessibilityDelegate(){
             @Override
-            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-                super.onInitializeAccessibilityNodeInfo(info);
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
                 info.setClassName(ToggleButton.class.getName());
                 info.setCheckable(true);
                 VoIPService service = VoIPService.getSharedInstance();
@@ -710,11 +711,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     info.setChecked(service.isSpeakerphoneOn());
                 }
             }
-        };
+        });
         speakerPhoneIcon.setContentDescription(LocaleController.getString("VoipSpeaker", R.string.VoipSpeaker));
         speakerPhoneIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));
-        speakerPhoneIcon.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12));
-        fragmentView.addView(speakerPhoneIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.RIGHT));
         speakerPhoneIcon.setOnClickListener(view -> {
             if (speakerPhoneIcon.getTag() == null) {
                 return;
