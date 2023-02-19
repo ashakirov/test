@@ -11,11 +11,13 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -27,6 +29,8 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
@@ -85,6 +89,26 @@ public class AcceptDeclineView extends View {
 
     public AcceptDeclineView(@NonNull Context context) {
         super(context);
+        init(context);
+    }
+
+    public AcceptDeclineView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public AcceptDeclineView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public AcceptDeclineView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init(context);
+    }
+
+    private void init(@NonNull Context context) {
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         buttonWidth = AndroidUtilities.dp(60);
         acceptDrawable = new FabBackgroundDrawable();

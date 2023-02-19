@@ -1,15 +1,32 @@
 package org.telegram.ui.Components.voip;
 
 import android.content.Context;
+import android.os.Build.VERSION_CODES;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 
 public class VoIPButtonsLayout extends FrameLayout {
+
+    public VoIPButtonsLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public VoIPButtonsLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public VoIPButtonsLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
 
     public VoIPButtonsLayout(@NonNull Context context) {
         super(context);

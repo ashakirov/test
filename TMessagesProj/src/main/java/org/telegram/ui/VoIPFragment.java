@@ -638,12 +638,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         statusTextView = fragmentView.findViewById(R.id.statusTextView);
 
-        buttonsLayout = new VoIPButtonsLayout(context);
+        buttonsLayout = fragmentView.findViewById(R.id.buttonsLayout);
         for (int i = 0; i < 4; i++) {
             bottomButtons[i] = new VoIPToggleButton(context);
             buttonsLayout.addView(bottomButtons[i]);
         }
-        acceptDeclineView = new AcceptDeclineView(context);
+        acceptDeclineView = fragmentView.findViewById(R.id.acceptDeclineView);
         acceptDeclineView.setListener(new AcceptDeclineView.Listener() {
             @Override
             public void onAccept() {
@@ -686,9 +686,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         });
         acceptDeclineView.setScreenWasWakeup(screenWasWakeup);
-
-        fragmentView.addView(buttonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
-        fragmentView.addView(acceptDeclineView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 186, Gravity.BOTTOM));
 
         backIcon = new ImageView(context);
         backIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));

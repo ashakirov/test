@@ -132,4 +132,15 @@
         android:textSize="16dp"
         android:visibility="gone" />
 
+    <org.telegram.ui.Components.voip.VoIPButtonsLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
+    <org.telegram.ui.Components.voip.AcceptDeclineView
+        android:id="@+id/acceptDeclineView"
+        android:layout_width="match_parent"
+        android:layout_height="186dp"
+        android:layout_gravity="bottom" />
 </org.telegram.ui.Call.ColoredInsetFrameLayout>
