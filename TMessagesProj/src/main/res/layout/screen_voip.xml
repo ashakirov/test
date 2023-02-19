@@ -48,4 +48,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
     </org.telegram.ui.Components.voip.VoIPFloatingLayout>
+
+    <org.telegram.ui.Components.voip.VoIPOverlayBackground
+        android:id="@+id/overlayBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

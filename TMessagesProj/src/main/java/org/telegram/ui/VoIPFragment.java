@@ -533,8 +533,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 callingUserPhotoView.invalidate();
             }
         });
-        overlayBackground = new VoIPOverlayBackground(context);
-        overlayBackground.setVisibility(View.GONE);
+        overlayBackground = fragmentView.findViewById(R.id.overlayBackground);
 
         callingUserPhotoView.getImageReceiver().setDelegate((imageReceiver, set, thumb, memCache) -> {
             ImageReceiver.BitmapHolder bmp = imageReceiver.getBitmapSafe();
@@ -589,9 +588,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 updateViewState();
             }
         });
-
-        fragmentView.addView(overlayBackground);
-
 
         bottomShadow = new View(context);
         bottomShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{Color.TRANSPARENT, ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.5f))}));
