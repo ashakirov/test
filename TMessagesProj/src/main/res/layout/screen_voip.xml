@@ -54,4 +54,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
+
+    <View
+        android:id="@+id/bottomShadow"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_gravity="bottom"/>
+
+    <View
+        android:id="@+id/topShadow"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_gravity="top"/>
+
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

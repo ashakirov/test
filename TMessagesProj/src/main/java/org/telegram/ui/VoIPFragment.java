@@ -589,13 +589,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         });
 
-        bottomShadow = new View(context);
+        bottomShadow = fragmentView.findViewById(R.id.bottomShadow);
         bottomShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{Color.TRANSPARENT, ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.5f))}));
-        fragmentView.addView(bottomShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140, Gravity.BOTTOM));
 
-        topShadow = new View(context);
+        topShadow = fragmentView.findViewById(R.id.topShadow);
         topShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)), Color.TRANSPARENT}));
-        fragmentView.addView(topShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140, Gravity.TOP));
 
 
         emojiLayout = new LinearLayout(context) {
