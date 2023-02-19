@@ -729,11 +729,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             updateViewState();
         });
 
-        tapToVideoTooltip = new HintView(context, 4);
+        tapToVideoTooltip = fragmentView.findViewById(R.id.tapToVideoTooltip);
+        tapToVideoTooltip.init(4, false, null);
         tapToVideoTooltip.setText(LocaleController.getString("TapToTurnCamera", R.string.TapToTurnCamera));
-        fragmentView.addView(tapToVideoTooltip, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 19, 0, 19, 8));
         tapToVideoTooltip.setBottomOffset(AndroidUtilities.dp(4));
-        tapToVideoTooltip.setVisibility(View.GONE);
 
         updateViewState();
 

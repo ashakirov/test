@@ -8,12 +8,18 @@ import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.Build.VERSION_CODES;
+import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
@@ -49,7 +55,24 @@ public class HintView extends FrameLayout {
 
     private int bottomOffset;
     private long showingDuration = 2000;
-    private final Theme.ResourcesProvider resourcesProvider;
+    private Theme.ResourcesProvider resourcesProvider;
+
+    public HintView(@NonNull Context context) {
+        super(context);
+    }
+
+    public HintView(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public HintView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public HintView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
 
     public HintView(Context context, int type) {
         this(context, type, false, null);
@@ -65,6 +88,11 @@ public class HintView extends FrameLayout {
 
     public HintView(Context context, int type, boolean topArrow, Theme.ResourcesProvider resourcesProvider) {
         super(context);
+        init(type, topArrow, resourcesProvider);
+    }
+
+    public void init(int type, boolean topArrow, Theme.ResourcesProvider resourcesProvider){
+        Context context = getContext();
         this.resourcesProvider = resourcesProvider;
 
         currentType = type;
