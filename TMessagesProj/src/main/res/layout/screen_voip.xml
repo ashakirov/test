@@ -59,13 +59,13 @@
         android:id="@+id/bottomShadow"
         android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom" />
 
     <View
         android:id="@+id/topShadow"
         android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:layout_gravity="top"/>
+        android:layout_gravity="top" />
 
     <org.telegram.ui.Components.BackupImageView
         android:id="@+id/callingUserPhotoViewMini"
@@ -73,6 +73,30 @@
         android:layout_height="135dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="68dp"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
+    <org.telegram.ui.Call.VoIPStatusLayout
+        android:id="@+id/statusLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:paddingBottom="15dp">
+
+        <TextView
+            android:id="@+id/callingUserTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="6dp"
+            android:gravity="center_horizontal"
+            android:importantForAccessibility="no"
+            android:textColor="@android:color/white"
+            android:textSize="24dp" />
+
+    </org.telegram.ui.Call.VoIPStatusLayout>
 </org.telegram.ui.Call.ColoredInsetFrameLayout>

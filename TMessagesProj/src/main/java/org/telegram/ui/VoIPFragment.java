@@ -629,60 +629,22 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             emojiViews[i].setScaleType(ImageView.ScaleType.FIT_XY);
             emojiLayout.addView(emojiViews[i], LayoutHelper.createLinear(22, 22, i == 0 ? 0 : 4, 0, 0, 0));
         }
-        statusLayout = new LinearLayout(context) {
-            @Override
-            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-                super.onInitializeAccessibilityNodeInfo(info);
-                final VoIPService service = VoIPService.getSharedInstance();
-                final CharSequence callingUserTitleText = callingUserTitle.getText();
-                if (service != null && !TextUtils.isEmpty(callingUserTitleText)) {
-                    final StringBuilder builder = new StringBuilder(callingUserTitleText);
-
-                    builder.append(", ");
-                    if (service.privateCall != null && service.privateCall.video) {
-                        builder.append(LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding));
-                    } else {
-                        builder.append(LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding));
-                    }
-
-                    final long callDuration = service.getCallDuration();
-                    if (callDuration > 0) {
-                        builder.append(", ");
-                        builder.append(LocaleController.formatDuration((int) (callDuration / 1000)));
-                    }
-
-                    info.setText(builder);
-                }
-            }
-        };
-        statusLayout.setOrientation(LinearLayout.VERTICAL);
-        statusLayout.setFocusable(true);
-        statusLayout.setFocusableInTouchMode(true);
+        statusLayout = fragmentView.findViewById(R.id.statusLayout);
 
         callingUserPhotoViewMini = fragmentView.findViewById(R.id.callingUserPhotoViewMini);
         callingUserPhotoViewMini.setImage(ImageLocation.getForUserOrChat(callingUser, ImageLocation.TYPE_SMALL), null, Theme.createCircleDrawable(AndroidUtilities.dp(135), 0xFF000000), callingUser);
         callingUserPhotoViewMini.setRoundRadius(AndroidUtilities.dp(135) / 2);
 
-        callingUserTitle = new TextView(context);
-        callingUserTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
+        callingUserTitle = fragmentView.findViewById(R.id.callingUserTitle);
         CharSequence name = ContactsController.formatName(callingUser.first_name, callingUser.last_name);
         name = Emoji.replaceEmoji(name, callingUserTitle.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20), false);
         callingUserTitle.setText(name);
         callingUserTitle.setShadowLayer(AndroidUtilities.dp(3), 0, AndroidUtilities.dp(.666666667f), 0x4C000000);
-        callingUserTitle.setTextColor(Color.WHITE);
-        callingUserTitle.setGravity(Gravity.CENTER_HORIZONTAL);
-        callingUserTitle.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        statusLayout.addView(callingUserTitle, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 6));
 
         statusTextView = new VoIPStatusTextView(context);
         ViewCompat.setImportantForAccessibility(statusTextView, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         statusLayout.addView(statusTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 6));
 
-        statusLayout.setClipChildren(false);
-        statusLayout.setClipToPadding(false);
-        statusLayout.setPadding(0, 0, 0, AndroidUtilities.dp(15));
-
-        fragmentView.addView(statusLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 68, 0, 0));
         fragmentView.addView(emojiLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 17, 0, 0));
         fragmentView.addView(emojiRationalTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 24, 32, 24, 0));
 
