@@ -6,11 +6,13 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build.VERSION_CODES;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
+import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -18,6 +20,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -44,8 +48,28 @@ public class VoIPStatusTextView extends FrameLayout {
 
     EllipsizeSpanAnimator ellipsizeAnimator;
 
+    public VoIPStatusTextView(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public VoIPStatusTextView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    @RequiresApi(api = VERSION_CODES.LOLLIPOP)
+    public VoIPStatusTextView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init(context);
+    }
+
     public VoIPStatusTextView(@NonNull Context context) {
         super(context);
+        init(context);
+    }
+
+    private void init(@NonNull Context context) {
         for (int i = 0; i < 2; i++) {
             textView[i] = new TextView(context);
             textView[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
@@ -72,7 +96,6 @@ public class VoIPStatusTextView extends FrameLayout {
 
         timerView = new VoIPTimerView(context);
         addView(timerView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-
     }
 
     public void setText(String text, boolean ellipsis, boolean animated) {

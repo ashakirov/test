@@ -98,18 +98,26 @@
             android:textColor="@android:color/white"
             android:textSize="24dp" />
 
+        <org.telegram.ui.Components.voip.VoIPStatusTextView
+            android:id="@+id/statusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="6dp"
+            android:importantForAccessibility="noHideDescendants"/>
+
     </org.telegram.ui.Call.VoIPStatusLayout>
 
     <LinearLayout
         android:id="@+id/emojiLayout"
-        android:orientation="horizontal"
-        android:clipToPadding="false"
-        android:paddingBottom="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="6dp" />
+        android:layout_marginBottom="6dp"
+        android:clipToPadding="false"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:paddingBottom="30dp" />
 
     <TextView
         android:id="@+id/emojiRationalTextView"
