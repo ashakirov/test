@@ -26,8 +26,6 @@ import org.telegram.ui.GroupCallActivity;
 
 public class VoIPPinchZoomFrameLayout extends FrameLayout {
 
-    private int backgroundColor = 0xff000000;
-
     public interface CallBackgroundViewCallback {
         void onTap(long time);
         VoIPTextureView getFullscreenTextureView();
@@ -76,9 +74,6 @@ public class VoIPPinchZoomFrameLayout extends FrameLayout {
 
     private void init(@NonNull Context context) {
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        setClipToPadding(false);
-        setClipChildren(false);
-        setBackgroundColor(backgroundColor);
     }
 
     float pressedX;
