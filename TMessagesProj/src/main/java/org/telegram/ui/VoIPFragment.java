@@ -13,9 +13,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.PowerManager;
@@ -26,19 +24,16 @@ import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
 import androidx.transition.TransitionValues;
 import androidx.transition.Visibility;
-import android.util.TypedValue;
-import android.view.Gravity;
+
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,7 +43,6 @@ import android.widget.ToggleButton;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
-import androidx.core.view.ViewCompat;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
@@ -90,7 +84,6 @@ import org.telegram.ui.Components.voip.VoIPButtonsLayout;
 import org.telegram.ui.Components.voip.VoIPFloatingLayout;
 import org.telegram.ui.Components.voip.VoIPHelper;
 import org.telegram.ui.Components.voip.VoIPNotificationsLayout;
-import org.telegram.ui.Components.voip.VoIPOverlayBackground;
 import org.telegram.ui.Components.voip.VoIPPiPView;
 import org.telegram.ui.Components.voip.VoIPStatusTextView;
 import org.telegram.ui.Components.voip.VoIPTextureView;
@@ -123,9 +116,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private ColoredInsetFrameLayout fragmentView;
     private VoIpBackgroundView mainBackgroundView;
-    private VoIPOverlayBackground overlayBackground;
 
     private CallingUserPhotoView callingUserPhotoView;
+    private BackupImageView callingUserPhoto;
     private BackupImageView callingUserPhotoViewMini;
 
     private TextView callingUserTitle;
@@ -519,7 +512,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         callingUserPhotoView = fragmentView.findViewById(R.id.callingUserPhotoView);
         callingUserPhotoView.init(AndroidUtilities.dp(78), AndroidUtilities.dp(88), AndroidUtilities.dp(6), 0x24ffffff, 0x14ffffff);
-        callingUserPhotoView.setRoundRadius(AndroidUtilities.dp(71));
+
+        callingUserPhoto = fragmentView.findViewById(R.id.callingUserPhoto);
+        callingUserPhoto.setRoundRadius(AndroidUtilities.dp(71));
         callingUserTextureView = fragmentView.findViewById(R.id.callingUserTextureView);
         callingUserTextureView.init(false, true, false, false);
         callingUserTextureView.renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
@@ -535,16 +530,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 callingUserPhotoView.invalidate();
             }
         });
-        overlayBackground = fragmentView.findViewById(R.id.overlayBackground);
 
-        callingUserPhotoView.getImageReceiver().setDelegate((imageReceiver, set, thumb, memCache) -> {
-            ImageReceiver.BitmapHolder bmp = imageReceiver.getBitmapSafe();
-            if (bmp != null) {
-                overlayBackground.setBackground(bmp);
-            }
-        });
-
-        callingUserPhotoView.setImage(ImageLocation.getForUserOrChat(callingUser, ImageLocation.TYPE_BIG), null, gradientDrawable, callingUser);
+        callingUserPhoto.setImage(ImageLocation.getForUserOrChat(callingUser, ImageLocation.TYPE_BIG), null, gradientDrawable, callingUser);
 
         currentUserCameraFloatingLayout = fragmentView.findViewById(R.id.currentUserCameraFloatingLayout);
         currentUserCameraFloatingLayout.setDelegate((progress, value) -> currentUserTextureView.setScreenshareMiniProgress(progress, value));
@@ -1032,14 +1019,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 emojiRationalTextView.setAlpha(0f);
             }
             emojiRationalTextView.animate().alpha(1f).setDuration(150).start();
-
-            overlayBackground.animate().setListener(null).cancel();
-            if (overlayBackground.getVisibility() != View.VISIBLE) {
-                overlayBackground.setVisibility(View.VISIBLE);
-                overlayBackground.setAlpha(0f);
-                overlayBackground.setShowBlackout(currentUserIsVideo || callingUserIsVideo, false);
-            }
-            overlayBackground.animate().alpha(1f).setDuration(150).start();
         } else {
             emojiLayout.animate().scaleX(1f).scaleY(1f)
                     .translationY(0)
@@ -1060,12 +1039,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     }
                 }).setDuration(150).start();
 
-                overlayBackground.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        overlayBackground.setVisibility(View.GONE);
-                    }
-                }).setDuration(150).start();
             }
         }
     }
@@ -1311,7 +1284,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             statusLayout.setTranslationY(statusLayoutOffset);
         }
         statusLayoutAnimateToOffset = statusLayoutOffset;
-        overlayBackground.setShowBlackout(currentUserIsVideo || callingUserIsVideo, animated);
         canSwitchToPip = (currentState != VoIPService.STATE_ENDED && currentState != VoIPService.STATE_BUSY) && (currentUserIsVideo || callingUserIsVideo);
 
         int floatingViewsOffset;
