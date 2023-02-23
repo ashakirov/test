@@ -75,6 +75,7 @@ import org.telegram.ui.Call.CallingUserPhotoView;
 import org.telegram.ui.Call.ColoredInsetFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
+import org.telegram.ui.Call.VoIpBackgroundView;
 import org.telegram.ui.Call.transition.InsetColorTransition;
 import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Components.AlertsCreator;
@@ -121,6 +122,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     VoIPToggleButton[] bottomButtons = new VoIPToggleButton[4];
 
     private ColoredInsetFrameLayout fragmentView;
+    private VoIpBackgroundView mainBackgroundView;
     private VoIPOverlayBackground overlayBackground;
 
     private CallingUserPhotoView callingUserPhotoView;
@@ -490,6 +492,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     public View createView(Context context, ViewGroup parent) {
         accessibilityManager = ContextCompat.getSystemService(context, AccessibilityManager.class);
         fragmentView = (ColoredInsetFrameLayout) LayoutInflater.from(context).inflate(R.layout.screen_voip, parent, false);
+
+        mainBackgroundView = fragmentView.findViewById(R.id.mainBackgroundView);
 
         pinchZoomLayout = fragmentView.findViewById(R.id.pinch_zoom_view);
         pinchZoomLayout.setCallback(new CallBackgroundViewCallback() {
