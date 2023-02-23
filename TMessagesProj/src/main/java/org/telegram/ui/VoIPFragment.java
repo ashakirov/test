@@ -69,6 +69,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.DarkAlertDialog;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Call.CallingUserPhotoView;
 import org.telegram.ui.Call.ColoredInsetFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
@@ -115,7 +116,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private ColoredInsetFrameLayout fragmentView;
     private VoIPOverlayBackground overlayBackground;
 
-    private BackupImageView callingUserPhotoView;
+    private CallingUserPhotoView callingUserPhotoView;
     private BackupImageView callingUserPhotoViewMini;
 
     private TextView callingUserTitle;
@@ -519,6 +520,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         updateSystemBarColors();
 
         callingUserPhotoView = fragmentView.findViewById(R.id.callingUserPhotoView);
+        callingUserPhotoView.init(AndroidUtilities.dp(78), AndroidUtilities.dp(88), AndroidUtilities.dp(6), 0x24ffffff, 0x14ffffff);
+        callingUserPhotoView.setRoundRadius(AndroidUtilities.dp(71));
         callingUserTextureView = fragmentView.findViewById(R.id.callingUserTextureView);
         callingUserTextureView.init(false, true, false, false);
         callingUserTextureView.renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);

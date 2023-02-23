@@ -2,12 +2,24 @@
 <org.telegram.ui.Call.ColoredInsetFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="#5BB96E">
 
-    <org.telegram.ui.Call.CallingUserPhotoView
-        android:id="@+id/callingUserPhotoView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <org.telegram.ui.Call.CallingUserPhotoView
+            android:id="@+id/callingUserPhotoView"
+            android:layout_width="142dp"
+            android:layout_height="142dp"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginTop="167dp"/>
+
+    </FrameLayout>
 
     <org.telegram.ui.Call.VoIPPinchZoomFrameLayout
         android:id="@+id/pinch_zoom_view"
