@@ -20,17 +20,19 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.PowerManager;
 import android.text.TextUtils;
-import android.transition.ChangeBounds;
-import android.transition.TransitionManager;
-import android.transition.TransitionSet;
-import android.transition.TransitionValues;
-import android.transition.Visibility;
+import androidx.transition.ChangeBounds;
+import androidx.transition.Fade;
+import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
+import androidx.transition.TransitionValues;
+import androidx.transition.Visibility;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -73,6 +75,8 @@ import org.telegram.ui.Call.CallingUserPhotoView;
 import org.telegram.ui.Call.ColoredInsetFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
+import org.telegram.ui.Call.transition.InsetColorTransition;
+import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.BackupImageView;
@@ -103,6 +107,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int STATE_GONE = 0;
     private final static int STATE_FULLSCREEN = 1;
     private final static int STATE_FLOATING = 2;
+
+    private final static int topNavigationColor = 0x66000000;
+    private final static int bottomNavigationColor = 0x7f000000;
 
     private final int currentAccount;
 
@@ -145,8 +152,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     View topShadow;
 
     private VoIPButtonsLayout buttonsLayout;
-    Paint overlayPaint = new Paint();
-    Paint overlayBottomPaint = new Paint();
 
     boolean isOutgoing;
     boolean callingUserIsVideo;
@@ -189,14 +194,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     ValueAnimator uiVisibilityAnimator;
     ValueAnimator.AnimatorUpdateListener statusbarAnimatorListener = valueAnimator -> {
         uiVisibilityAlpha = (float) valueAnimator.getAnimatedValue();
-        updateSystemBarColors();
-    };
-
-    float fillNaviagtionBarValue;
-    boolean fillNaviagtionBar;
-    ValueAnimator naviagtionBarAnimator;
-    ValueAnimator.AnimatorUpdateListener navigationBarAnimationListener = valueAnimator -> {
-        fillNaviagtionBarValue = (float) valueAnimator.getAnimatedValue();
         updateSystemBarColors();
     };
 
@@ -493,8 +490,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     public View createView(Context context, ViewGroup parent) {
         accessibilityManager = ContextCompat.getSystemService(context, AccessibilityManager.class);
         fragmentView = (ColoredInsetFrameLayout) LayoutInflater.from(context).inflate(R.layout.screen_voip, parent, false);
-        fragmentView.setOverlayPaint(overlayPaint);
-        fragmentView.setOverlayBottomPaint(overlayBottomPaint);
 
         pinchZoomLayout = fragmentView.findViewById(R.id.pinch_zoom_view);
         pinchZoomLayout.setCallback(new CallBackgroundViewCallback() {
@@ -594,10 +589,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
 
         bottomShadow = fragmentView.findViewById(R.id.bottomShadow);
-        bottomShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{Color.TRANSPARENT, ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.5f))}));
+        bottomShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{Color.TRANSPARENT, bottomNavigationColor}));
 
         topShadow = fragmentView.findViewById(R.id.topShadow);
-        topShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)), Color.TRANSPARENT}));
+        topShadow.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{topNavigationColor, Color.TRANSPARENT}));
 
 
         emojiLayout = fragmentView.findViewById(R.id.emojiLayout);
@@ -640,7 +635,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserTitle.setShadowLayer(AndroidUtilities.dp(3), 0, AndroidUtilities.dp(.666666667f), 0x4C000000);
 
         statusTextView = fragmentView.findViewById(R.id.statusTextView);
-
         buttonsLayout = fragmentView.findViewById(R.id.buttonsLayout);
         for (int i = 0; i < 4; i++) {
             bottomButtons[i] = new VoIPToggleButton(context);
@@ -811,8 +805,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         emojiLayout.animate().alpha(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         statusLayout.animate().alpha(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         buttonsLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-        bottomShadow.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-        topShadow.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         callingUserMiniFloatingLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         notificationsLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
 
@@ -865,8 +857,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             emojiLayout.setAlpha(0f);
             statusLayout.setAlpha(0f);
             buttonsLayout.setAlpha(0f);
-            bottomShadow.setAlpha(0f);
-            topShadow.setAlpha(0f);
             speakerPhoneIcon.setAlpha(0f);
             notificationsLayout.setAlpha(0f);
             callingUserPhotoView.setAlpha(0f);
@@ -881,8 +871,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 emojiLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 statusLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 buttonsLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-                bottomShadow.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-                topShadow.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 notificationsLayout.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 callingUserPhotoView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
 
@@ -1418,23 +1406,39 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         if (switchingToPip) {
             return;
         }
-        if (!animated) {
-            if (naviagtionBarAnimator != null) {
-                naviagtionBarAnimator.cancel();
-            }
-            fillNaviagtionBarValue = fill ? 1 : 0;
-            overlayBottomPaint.setColor(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * (fill ? 1f : 0.5f))));
-        } else if (fill != fillNaviagtionBar) {
-            if (naviagtionBarAnimator != null) {
-                naviagtionBarAnimator.cancel();
-            }
-            naviagtionBarAnimator = ValueAnimator.ofFloat(fillNaviagtionBarValue, fill ? 1 : 0);
-            naviagtionBarAnimator.addUpdateListener(navigationBarAnimationListener);
-            naviagtionBarAnimator.setDuration(300);
-            naviagtionBarAnimator.setInterpolator(new LinearInterpolator());
-            naviagtionBarAnimator.start();
+
+        if (animated) {
+            TransitionSet set = new TransitionSet();
+            set.setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+            InsetColorTransition topColorTransition = new InsetColorTransition(Type.TOP);
+            topColorTransition.addTarget(fragmentView);
+            set.addTransition(topColorTransition);
+
+            InsetColorTransition bottomColorTransition = new InsetColorTransition(Type.BOTTOM);
+            bottomColorTransition.addTarget(fragmentView);
+            set.addTransition(bottomColorTransition);
+
+            Fade fade = new Fade();
+            fade.addTarget(bottomShadow);
+            fade.addTarget(topShadow);
+            set.addTransition(fade);
+            set.setInterpolator(CubicBezierInterpolator.DEFAULT);
+            
+            TransitionManager.beginDelayedTransition(fragmentView, set);
         }
-        fillNaviagtionBar = fill;
+
+        if (fill) {
+            fragmentView.setTopColor(topNavigationColor);
+            fragmentView.setBottomColor(bottomNavigationColor);
+            bottomShadow.setVisibility(View.VISIBLE);
+            topShadow.setVisibility(View.VISIBLE);
+        } else {
+            fragmentView.setTopColor(Color.TRANSPARENT);
+            fragmentView.setBottomColor(Color.TRANSPARENT);
+            bottomShadow.setVisibility(View.GONE);
+            topShadow.setVisibility(View.GONE);
+        }
     }
 
     private void showUi(boolean show) {
@@ -1448,8 +1452,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             emojiLayout.animate().alpha(0).translationY(-AndroidUtilities.dp(50)).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
             statusLayout.animate().alpha(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
             buttonsLayout.animate().alpha(0).translationY(AndroidUtilities.dp(50)).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            bottomShadow.animate().alpha(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            topShadow.animate().alpha(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
             uiVisibilityAnimator = ValueAnimator.ofFloat(uiVisibilityAlpha, 0);
             uiVisibilityAnimator.addUpdateListener(statusbarAnimatorListener);
             uiVisibilityAnimator.setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT);
@@ -1464,8 +1466,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             emojiLayout.animate().alpha(1f).translationY(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
             statusLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
             buttonsLayout.animate().alpha(1f).translationY(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            bottomShadow.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-            topShadow.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
             uiVisibilityAnimator = ValueAnimator.ofFloat(uiVisibilityAlpha, 1f);
             uiVisibilityAnimator.addUpdateListener(statusbarAnimatorListener);
             uiVisibilityAnimator.setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT);
@@ -2005,8 +2005,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     }
 
     private void updateSystemBarColors() {
-        overlayPaint.setColor(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f * uiVisibilityAlpha * enterTransitionProgress)));
-        overlayBottomPaint.setColor(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * (0.5f + 0.5f * fillNaviagtionBarValue) * enterTransitionProgress)));
         if (fragmentView != null) {
             fragmentView.invalidate();
         }

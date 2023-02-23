@@ -2,8 +2,7 @@
 <org.telegram.ui.Call.ColoredInsetFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#5BB96E">
+    android:fitsSystemWindows="true">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -73,13 +72,15 @@
         android:id="@+id/bottomShadow"
         android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:layout_gravity="bottom" />
+        android:layout_gravity="bottom"
+        android:visibility="gone"/>
 
     <View
         android:id="@+id/topShadow"
         android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:layout_gravity="top" />
+        android:layout_gravity="top"
+        android:visibility="gone"/>
 
     <org.telegram.ui.Components.BackupImageView
         android:id="@+id/callingUserPhotoViewMini"
