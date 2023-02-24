@@ -5,14 +5,17 @@ import android.graphics.Canvas;
 import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.util.Property;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.SharedConfig;
-import org.telegram.ui.Components.BackupImageView;
 
-public class CallingUserPhotoView extends BackupImageView {
+public class CallingUserPhotoView extends View {
 
     private int innerWaveRadius = 50;
     private int outerWaveRadius = 70;
@@ -78,6 +81,7 @@ public class CallingUserPhotoView extends BackupImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
         if (getWidth() == 0 || getHeight() == 0) {
             return;
         }
@@ -100,7 +104,6 @@ public class CallingUserPhotoView extends BackupImageView {
                 postDelayed(this::invalidate, 16);
             }
         }
-        super.onDraw(canvas);
     }
 
     public void setWaveAmplitude(int waveAmplitude) {

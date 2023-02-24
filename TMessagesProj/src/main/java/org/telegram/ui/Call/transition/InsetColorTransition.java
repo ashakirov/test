@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.transition.Transition;
 import androidx.transition.TransitionValues;
 
-import org.telegram.ui.Call.ColoredInsetFrameLayout;
+import org.telegram.ui.Call.ColoredInsetConstraintLayout;
 
 public class InsetColorTransition extends Transition {
     public enum Type {
@@ -40,10 +40,10 @@ public class InsetColorTransition extends Transition {
 
     private void captureValues(TransitionValues transitionValues, boolean startValue) {
         View view = transitionValues.view;
-        if (!(view instanceof ColoredInsetFrameLayout) || view.getVisibility() != View.VISIBLE) {
+        if (!(view instanceof ColoredInsetConstraintLayout) || view.getVisibility() != View.VISIBLE) {
             return;
         }
-        ColoredInsetFrameLayout view1 = (ColoredInsetFrameLayout) view;
+        ColoredInsetConstraintLayout view1 = (ColoredInsetConstraintLayout) view;
         switch (type) {
             case TOP: {
                 int color = view1.getTopColor();
@@ -67,26 +67,26 @@ public class InsetColorTransition extends Transition {
 
         int startValue = 0;
         int endValue = 0;
-        Property<ColoredInsetFrameLayout, Integer> property = null;
+        Property<ColoredInsetConstraintLayout, Integer> property = null;
 
         switch (type) {
             case TOP: {
                 startValue = (int) startValues.values.get(PROPNAME_TOP_COLOR);
                 endValue = (int) endValues.values.get(PROPNAME_TOP_COLOR);
-                property = ColoredInsetFrameLayout.PROPERTY_TOP_COLOR;
+                property = ColoredInsetConstraintLayout.PROPERTY_TOP_COLOR;
             }
             break;
             case BOTTOM: {
                 startValue = (int) startValues.values.get(PROPNAME_BOTTOM_COLOR);
                 endValue = (int) endValues.values.get(PROPNAME_BOTTOM_COLOR);
-                property = ColoredInsetFrameLayout.PROPERTY_BOTTOM_COLOR;
+                property = ColoredInsetConstraintLayout.PROPERTY_BOTTOM_COLOR;
             }
             break;
         }
         if (startValue == endValue) {
             return null;
         }
-        ColoredInsetFrameLayout view = (ColoredInsetFrameLayout) endValues.view;
+        ColoredInsetConstraintLayout view = (ColoredInsetConstraintLayout) endValues.view;
         property.set(view, startValue);
         return ObjectAnimator.ofObject(view, property, new ArgbEvaluator(), startValue, endValue);
     }

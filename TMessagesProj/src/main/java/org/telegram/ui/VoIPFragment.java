@@ -18,6 +18,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.PowerManager;
 import android.text.TextUtils;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.transition.ChangeBounds;
 import androidx.transition.Fade;
 import androidx.transition.TransitionManager;
@@ -49,7 +51,6 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
-import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
@@ -66,7 +67,7 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.DarkAlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Call.CallingUserPhotoView;
-import org.telegram.ui.Call.ColoredInsetFrameLayout;
+import org.telegram.ui.Call.ColoredInsetConstraintLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
 import org.telegram.ui.Call.VoIpBackgroundView;
@@ -114,8 +115,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     VoIPToggleButton[] bottomButtons = new VoIPToggleButton[4];
 
-    private ColoredInsetFrameLayout fragmentView;
+    private ColoredInsetConstraintLayout fragmentView;
     private VoIpBackgroundView mainBackgroundView;
+    private View topInsetView, bottomInsetView;
 
     private CallingUserPhotoView callingUserPhotoView;
     private BackupImageView callingUserPhoto;
@@ -366,20 +368,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setInsets(WindowInsets windowInsets) {
         lastInsets = windowInsets;
-        ((FrameLayout.LayoutParams) buttonsLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
-        ((FrameLayout.LayoutParams) acceptDeclineView.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
-        ((FrameLayout.LayoutParams) backIcon.getLayoutParams()).topMargin = lastInsets.getSystemWindowInsetTop();
-        ((FrameLayout.LayoutParams) speakerPhoneIcon.getLayoutParams()).topMargin = lastInsets.getSystemWindowInsetTop();
-        ((FrameLayout.LayoutParams) topShadow.getLayoutParams()).topMargin = lastInsets.getSystemWindowInsetTop();
-        ((FrameLayout.LayoutParams) emojiLayout.getLayoutParams()).topMargin = AndroidUtilities.dp(17) + lastInsets.getSystemWindowInsetTop();
-        ((FrameLayout.LayoutParams) callingUserPhotoViewMini.getLayoutParams()).topMargin = AndroidUtilities.dp(68) + lastInsets.getSystemWindowInsetTop();
 
-        ((FrameLayout.LayoutParams) currentUserCameraFloatingLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
-        ((FrameLayout.LayoutParams) callingUserMiniFloatingLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
-        ((FrameLayout.LayoutParams) callingUserTextureView.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
-        ((FrameLayout.LayoutParams) notificationsLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) topInsetView.getLayoutParams();
+        layoutParams.height = lastInsets.getSystemWindowInsetTop();
+        ConstraintLayout.LayoutParams layoutParams2 = (ConstraintLayout.LayoutParams) bottomInsetView.getLayoutParams();
+        layoutParams2.height = lastInsets.getSystemWindowInsetBottom();
 
-        ((FrameLayout.LayoutParams) bottomShadow.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
         currentUserCameraFloatingLayout.setInsets(lastInsets);
         callingUserMiniFloatingLayout.setInsets(lastInsets);
         fragmentView.setInsets(lastInsets);
@@ -483,7 +477,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     public View createView(Context context, ViewGroup parent) {
         accessibilityManager = ContextCompat.getSystemService(context, AccessibilityManager.class);
-        fragmentView = (ColoredInsetFrameLayout) LayoutInflater.from(context).inflate(R.layout.screen_voip, parent, false);
+        fragmentView = (ColoredInsetConstraintLayout) LayoutInflater.from(context).inflate(R.layout.screen_voip, parent, false);
+
+        topInsetView = fragmentView.findViewById(R.id.topInsetView);
+        bottomInsetView = fragmentView.findViewById(R.id.bottomInsetView);
 
         mainBackgroundView = fragmentView.findViewById(R.id.mainBackgroundView);
 

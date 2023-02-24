@@ -8,53 +8,53 @@ import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.WindowInsets;
-import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
-public class ColoredInsetFrameLayout extends FrameLayout {
+public class ColoredInsetConstraintLayout extends ConstraintLayout {
 
     private WindowInsets lastInsets;
     private Paint overlayPaint = new Paint();
     private Paint overlayBottomPaint = new Paint();
     private int topColor, bottomColor;
 
-    public static final Property<ColoredInsetFrameLayout, Integer> PROPERTY_TOP_COLOR = new Property<ColoredInsetFrameLayout, Integer>(Integer.class, "topColor") {
-        public Integer get(ColoredInsetFrameLayout object) {
+    public static final Property<ColoredInsetConstraintLayout, Integer> PROPERTY_TOP_COLOR = new Property<ColoredInsetConstraintLayout, Integer>(Integer.class, "topColor") {
+        public Integer get(ColoredInsetConstraintLayout object) {
             return object.topColor;
         }
 
-        public void set(ColoredInsetFrameLayout object, Integer value) {
+        public void set(ColoredInsetConstraintLayout object, Integer value) {
             object.setTopColor(value);
         }
     };
 
-    public static final Property<ColoredInsetFrameLayout, Integer> PROPERTY_BOTTOM_COLOR = new Property<ColoredInsetFrameLayout, Integer>(Integer.class, "bottomColor") {
-        public Integer get(ColoredInsetFrameLayout object) {
+    public static final Property<ColoredInsetConstraintLayout, Integer> PROPERTY_BOTTOM_COLOR = new Property<ColoredInsetConstraintLayout, Integer>(Integer.class, "bottomColor") {
+        public Integer get(ColoredInsetConstraintLayout object) {
             return object.bottomColor;
         }
 
-        public void set(ColoredInsetFrameLayout object, Integer value) {
+        public void set(ColoredInsetConstraintLayout object, Integer value) {
             object.setBottomColor(value);
         }
     };
 
-    public ColoredInsetFrameLayout(@NonNull Context context) {
+    public ColoredInsetConstraintLayout(@NonNull Context context) {
         super(context);
     }
 
-    public ColoredInsetFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ColoredInsetConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ColoredInsetFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ColoredInsetConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @RequiresApi(api = VERSION_CODES.LOLLIPOP)
-    public ColoredInsetFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ColoredInsetConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
