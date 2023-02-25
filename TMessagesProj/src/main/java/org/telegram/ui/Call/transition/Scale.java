@@ -81,7 +81,7 @@ public class Scale extends Visibility {
         float terminatePivotY = view.getPivotY();
 
         if (pivotCenter) {
-            view.setPivotY(view.getHeight());
+            view.setPivotY(view.getHeight() / 2f);
             view.setPivotX(view.getWidth() / 2f);
         }
 

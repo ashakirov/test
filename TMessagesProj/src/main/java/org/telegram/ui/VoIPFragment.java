@@ -40,12 +40,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
-import androidx.transition.AutoTransition;
 import androidx.transition.ChangeBounds;
 import androidx.transition.ChangeImageTransform;
-import androidx.transition.ChangeTransform;
 import androidx.transition.Fade;
-import androidx.transition.Slide;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
 import androidx.transition.TransitionValues;
@@ -79,6 +76,7 @@ import org.telegram.ui.Call.VoIpBackgroundView;
 import org.telegram.ui.Call.transition.InsetColorTransition;
 import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Call.transition.Scale;
+import org.telegram.ui.Call.transition.Slide;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.BackupImageView;
@@ -116,6 +114,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int EMOJI_COUNT = 4;
     private final static int EMOJI_BIG_HOR_PADDING = 12;
     private final static int EMOJI_HOR_PADDING = 4;
+    private final static int EMOJI_BIG_MARGIN_TOP = 120;
+    private final static int EMOJI_MARGIN_TOP = 12;
 
     private final int currentAccount;
 
@@ -603,7 +603,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 expandEmoji(!emojiExpanded);
             }
         };
-        emojiFrame.setOnClickListener(emojiClickListener);
+        emojiLayout.setOnClickListener(emojiClickListener);
+        emojiBackground.setOnClickListener(emojiClickListener);
         btnHideEmoji.setOnClickListener(emojiClickListener);
 
         emojiRationalTextView = fragmentView.findViewById(R.id.emojiRationalTextView);
@@ -690,7 +691,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         speakerPhoneIcon = fragmentView.findViewById(R.id.speakerPhoneIcon);
-        speakerPhoneIcon.setAccessibilityDelegate(new AccessibilityDelegate(){
+        speakerPhoneIcon.setAccessibilityDelegate(new AccessibilityDelegate() {
             @Override
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
@@ -1010,9 +1011,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         TransitionSet bgSet = new TransitionSet();
         bgSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
-        bgSet.addTransition(new Slide(Gravity.TOP));
+        bgSet.addTransition(new Slide(-AndroidUtilities.dp(150), 0f));
         bgSet.addTransition(new Scale(0.2f, true));
         bgSet.addTransition(new Fade());
+        bgSet.setDuration(350);
+        bgSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
         bgSet.addTarget(emojiBackground);
         bgSet.addTarget(emojiRationalTextView);
         bgSet.addTarget(emojiEncriptionTextView);
@@ -1048,7 +1051,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     emojiLP.leftMargin = AndroidUtilities.dp(EMOJI_BIG_HOR_PADDING);
                 }
             }
-            emojiFrameLP.topMargin = AndroidUtilities.dp(120);
+            emojiFrameLP.topMargin = AndroidUtilities.dp(EMOJI_BIG_MARGIN_TOP);
             emojiFrame.setPadding(emojiFramePadding, emojiFramePadding, emojiFramePadding, emojiFramePadding);
             emojiBackground.setVisibility(View.VISIBLE);
             btnHideEmoji.setVisibility(View.VISIBLE);
@@ -1066,12 +1069,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     emojiLP.leftMargin = AndroidUtilities.dp(EMOJI_HOR_PADDING);
                 }
             }
-            emojiFrameLP.topMargin = AndroidUtilities.dp(12);
+            emojiFrameLP.topMargin = AndroidUtilities.dp(EMOJI_MARGIN_TOP);
             emojiFrame.setPadding(emojiFramePadding, 0, emojiFramePadding, emojiFramePadding);
             emojiBackground.setVisibility(View.GONE);
             btnHideEmoji.setVisibility(View.GONE);
-            emojiRationalTextView.setVisibility(View.INVISIBLE);
-            emojiEncriptionTextView.setVisibility(View.INVISIBLE);
+            emojiRationalTextView.setVisibility(View.GONE);
+            emojiEncriptionTextView.setVisibility(View.GONE);
             callingUserPhotoView.setVisibility(View.VISIBLE);
             callingUserPhoto.setVisibility(View.VISIBLE);
         }
@@ -1880,7 +1883,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private void setFrontalCameraAction(VoIPToggleButton bottomButton, VoIPService service, boolean animated) {
         if (!currentUserIsVideo) {
-            bottomButton.setData(R.drawable.calls_flip,  ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.5f)), ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipFlip", R.string.VoipFlip), false, animated);
+            bottomButton.setData(R.drawable.calls_flip, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.5f)), ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipFlip", R.string.VoipFlip), false, animated);
             bottomButton.setOnClickListener(null);
             bottomButton.setEnabled(false);
         } else {
