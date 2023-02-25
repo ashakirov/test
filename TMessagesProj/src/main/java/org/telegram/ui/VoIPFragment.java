@@ -18,7 +18,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.PowerManager;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,9 +34,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.transition.ChangeBounds;
@@ -68,11 +67,13 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.DarkAlertDialog;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Call.CallingUserPhotoView;
+import org.telegram.ui.Call.BlobView;
 import org.telegram.ui.Call.ColoredInsetConstraintLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
+import org.telegram.ui.Call.VoIPTransitions;
 import org.telegram.ui.Call.VoIpBackgroundView;
+import org.telegram.ui.Call.transition.BlobVisibility;
 import org.telegram.ui.Call.transition.InsetColorTransition;
 import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Call.transition.Scale;
@@ -130,7 +131,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private VoIpBackgroundView mainBackgroundView;
     private View topInsetView, bottomInsetView;
 
-    private CallingUserPhotoView callingUserPhotoView;
+    private BlobView callingUserPhotoBlobView;
     private BackupImageView callingUserPhoto;
     private BackupImageView callingUserPhotoViewMini;
 
@@ -514,8 +515,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
         updateSystemBarColors();
 
-        callingUserPhotoView = fragmentView.findViewById(R.id.callingUserPhotoView);
-        callingUserPhotoView.init(AndroidUtilities.dp(78), AndroidUtilities.dp(88), AndroidUtilities.dp(6), 0x24ffffff, 0x14ffffff);
+        callingUserPhotoBlobView = fragmentView.findViewById(R.id.userPhotoBlobs);
+        callingUserPhotoBlobView.init(AndroidUtilities.dp(78), AndroidUtilities.dp(88), AndroidUtilities.dp(6), 0x24ffffff, 0x14ffffff);
 
         callingUserPhoto = fragmentView.findViewById(R.id.callingUserPhoto);
         callingUserPhoto.setRoundRadius(AndroidUtilities.dp(71));
@@ -531,7 +532,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         gradientDrawable.startDithering(sizes, new BackgroundGradientDrawable.ListenerAdapter() {
             @Override
             public void onAllSizesReady() {
-                callingUserPhotoView.invalidate();
+                callingUserPhotoBlobView.invalidate();
             }
         });
 
@@ -851,7 +852,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             buttonsLayout.setAlpha(0f);
             speakerPhoneIcon.setAlpha(0f);
             notificationsLayout.setAlpha(0f);
-            callingUserPhotoView.setAlpha(0f);
+            callingUserPhotoBlobView.setAlpha(0f);
 
             currentUserCameraFloatingLayout.switchingToPip = true;
             AndroidUtilities.runOnUIThread(() -> {
@@ -863,7 +864,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 statusLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 buttonsLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 notificationsLayout.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-                callingUserPhotoView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+                callingUserPhotoBlobView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
 
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -948,11 +949,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserTextureView.setTranslationY(callingUserToY);
             callingUserTextureView.setRoundCorners(AndroidUtilities.dp(6) * 1f / callingUserToScale);
 
-            callingUserPhotoView.setAlpha(0f);
-            callingUserPhotoView.setScaleX(callingUserToScale);
-            callingUserPhotoView.setScaleY(callingUserToScale);
-            callingUserPhotoView.setTranslationX(callingUserToX);
-            callingUserPhotoView.setTranslationY(callingUserToY);
+            callingUserPhotoBlobView.setAlpha(0f);
+            callingUserPhotoBlobView.setScaleX(callingUserToScale);
+            callingUserPhotoBlobView.setScaleY(callingUserToScale);
+            callingUserPhotoBlobView.setTranslationX(callingUserToX);
+            callingUserPhotoBlobView.setTranslationY(callingUserToY);
         }
         ValueAnimator animator = ValueAnimator.ofFloat(enter ? 1f : 0, enter ? 0 : 1f);
 
@@ -989,11 +990,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 currentUserTextureView.setScreenshareMiniProgress(v, false);
             }
 
-            callingUserPhotoView.setScaleX(callingUserScale);
-            callingUserPhotoView.setScaleY(callingUserScale);
-            callingUserPhotoView.setTranslationX(tx);
-            callingUserPhotoView.setTranslationY(ty);
-            callingUserPhotoView.setAlpha(1f - v);
+            callingUserPhotoBlobView.setScaleX(callingUserScale);
+            callingUserPhotoBlobView.setScaleY(callingUserScale);
+            callingUserPhotoBlobView.setTranslationX(tx);
+            callingUserPhotoBlobView.setTranslationY(ty);
+            callingUserPhotoBlobView.setAlpha(1f - v);
         });
         return animator;
     }
@@ -1004,40 +1005,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
         emojiExpanded = expanded;
 
-        TransitionSet set = new TransitionSet();
-        Fade btnHideEmojiFade = new Fade();
-        btnHideEmojiFade.addTarget(btnHideEmoji);
-        set.addTransition(btnHideEmojiFade);
-
-        TransitionSet bgSet = new TransitionSet();
-        bgSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
-        bgSet.addTransition(new Slide(-AndroidUtilities.dp(150), 0f));
-        bgSet.addTransition(new Scale(0.2f, true));
-        bgSet.addTransition(new Fade());
-        bgSet.setDuration(350);
-        bgSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
-        bgSet.addTarget(emojiBackground);
-        bgSet.addTarget(emojiRationalTextView);
-        bgSet.addTarget(emojiEncriptionTextView);
-        set.addTransition(bgSet);
-
-        TransitionSet emojiSet = new TransitionSet();
-        emojiSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
-        emojiSet.addTransition(new ChangeImageTransform());
-        emojiSet.addTransition(new ChangeBounds());
-        for (ImageView emojiView : emojiViews) {
-            emojiSet.addTarget(emojiView);
-        }
-        set.addTransition(emojiSet);
-
-        ChangeBounds changeBounds = new ChangeBounds();
-        changeBounds.addTarget(emojiLayout);
-        changeBounds.addTarget(emojiFrame);
-        changeBounds.addTarget(emojiLayout);
-        changeBounds.addTarget(statusLayout);
-        set.addTransition(changeBounds);
-
-        TransitionManager.beginDelayedTransition(fragmentView, set);
+        TransitionSet transition = VoIPTransitions.emojiExpandTransition(expanded,
+                btnHideEmoji, emojiBackground, emojiRationalTextView,
+                emojiEncriptionTextView, emojiViews, callingUserPhotoBlobView,
+                callingUserPhoto, emojiLayout, emojiFrame, statusLayout);
+        TransitionManager.beginDelayedTransition(fragmentView, transition);
 
         ConstraintLayout.LayoutParams emojiFrameLP = (ConstraintLayout.LayoutParams) emojiFrame.getLayoutParams();
         int emojiFramePadding = AndroidUtilities.dp(24);
@@ -1057,7 +1029,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             btnHideEmoji.setVisibility(View.VISIBLE);
             emojiRationalTextView.setVisibility(View.VISIBLE);
             emojiEncriptionTextView.setVisibility(View.VISIBLE);
-            callingUserPhotoView.setVisibility(View.GONE);
+            callingUserPhotoBlobView.setVisibility(View.GONE);
             callingUserPhoto.setVisibility(View.GONE);
         } else {
             for (int i = 0; i < emojiViews.length; i++) {
@@ -1075,7 +1047,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             btnHideEmoji.setVisibility(View.GONE);
             emojiRationalTextView.setVisibility(View.GONE);
             emojiEncriptionTextView.setVisibility(View.GONE);
-            callingUserPhotoView.setVisibility(View.VISIBLE);
+            callingUserPhotoBlobView.setVisibility(View.VISIBLE);
             callingUserPhoto.setVisibility(View.VISIBLE);
         }
         emojiLayout.requestLayout();
@@ -1234,7 +1206,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         if (callingUserIsVideo) {
             if (!switchingToPip) {
-                callingUserPhotoView.setAlpha(1f);
+                callingUserPhotoBlobView.setAlpha(1f);
             }
             if (animated) {
                 callingUserTextureView.animate().alpha(1f).setDuration(250).start();
@@ -1251,7 +1223,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             fillNavigationBar(true, animated);
         } else {
             fillNavigationBar(false, animated);
-            callingUserPhotoView.setVisibility(View.VISIBLE);
+            callingUserPhotoBlobView.setVisibility(View.VISIBLE);
             if (animated) {
                 callingUserTextureView.animate().alpha(0f).setDuration(250).start();
             } else {

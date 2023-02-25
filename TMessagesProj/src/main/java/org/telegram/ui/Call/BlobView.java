@@ -6,16 +6,13 @@ import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.SharedConfig;
 
-public class CallingUserPhotoView extends View {
+public class BlobView extends View {
 
     private int innerWaveRadius = 50;
     private int outerWaveRadius = 70;
@@ -23,42 +20,51 @@ public class CallingUserPhotoView extends View {
 
     private BlobDrawable innerWave, outerWave;
     public int waveAmplitude;
-    public int blobExtraSize;
 
-    public static final Property<CallingUserPhotoView, Integer> PROPERTY_BLOB_EXTRA_SIZE = new Property<CallingUserPhotoView, Integer>(Integer.class, "blobExtraSize") {
-        public Integer get(CallingUserPhotoView object) {
-            return object.blobExtraSize;
+    public static final Property<BlobView, Integer> PROPERTY_INNER_RADIUS = new Property<BlobView, Integer>(Integer.class, "innerWaveRadius") {
+        public Integer get(BlobView object) {
+            return object.innerWaveRadius;
         }
 
-        public void set(CallingUserPhotoView object, Integer value) {
-            object.setBlobExtraSize(value);
+        public void set(BlobView object, Integer value) {
+            object.setInnerWaveRadius(value);
         }
     };
 
-    public static final Property<CallingUserPhotoView, Integer> PROPERTY_WAVE_AMPLITUDE = new Property<CallingUserPhotoView, Integer>(Integer.class, "waveAmplitude") {
-        public Integer get(CallingUserPhotoView object) {
+    public static final Property<BlobView, Integer> PROPERTY_OUTER_RADIUS = new Property<BlobView, Integer>(Integer.class, "outerWaveRadius") {
+        public Integer get(BlobView object) {
+            return object.outerWaveRadius;
+        }
+
+        public void set(BlobView object, Integer value) {
+            object.setOuterWaveRadius(value);
+        }
+    };
+
+    public static final Property<BlobView, Integer> PROPERTY_WAVE_AMPLITUDE = new Property<BlobView, Integer>(Integer.class, "waveAmplitude") {
+        public Integer get(BlobView object) {
             return object.waveAmplitude;
         }
 
-        public void set(CallingUserPhotoView object, Integer value) {
+        public void set(BlobView object, Integer value) {
             object.setWaveAmplitude(value);
         }
     };
 
-    public CallingUserPhotoView(Context context) {
+    public BlobView(Context context) {
         super(context);
     }
 
-    public CallingUserPhotoView(Context context, @Nullable AttributeSet attrs) {
+    public BlobView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CallingUserPhotoView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public BlobView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @RequiresApi(api = VERSION_CODES.LOLLIPOP)
-    public CallingUserPhotoView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public BlobView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -117,14 +123,23 @@ public class CallingUserPhotoView extends View {
         return waveAmplitude;
     }
 
-    public void setBlobExtraSize(int blobExtraSize) {
-        this.blobExtraSize = blobExtraSize;
-        innerWave.setMinRadius(innerWaveRadius + blobExtraSize);
-        outerWave.setMinRadius(outerWaveRadius + blobExtraSize);
+    public int getInnerWaveRadius() {
+        return innerWaveRadius;
+    }
+
+    public void setInnerWaveRadius(int innerWaveRadius) {
+        this.innerWaveRadius = innerWaveRadius;
+        innerWave.setMinRadius(innerWaveRadius);
         invalidate();
     }
 
-    public int getBlobExtraSize() {
-        return blobExtraSize;
+    public int getOuterWaveRadius() {
+        return outerWaveRadius;
+    }
+
+    public void setOuterWaveRadius(int outerWaveRadius) {
+        this.outerWaveRadius = outerWaveRadius;
+        outerWave.setMinRadius(outerWaveRadius);
+        invalidate();
     }
 }
