@@ -22,6 +22,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -136,7 +137,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private VoIPPinchZoomFrameLayout pinchZoomLayout;
     private ViewGroup emojiFrame;
-    private View emojiBackground;
+    private View emojiBackground, btnHideEmoji;
     private LinearLayout emojiLayout;
     private TextView emojiRationalTextView, emojiEncriptionTextView;
     private ImageView[] emojiViews = new ImageView[EMOJI_COUNT];
@@ -586,8 +587,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         emojiLayout = fragmentView.findViewById(R.id.emojiLayout);
         emojiFrame = fragmentView.findViewById(R.id.emojiFrame);
         emojiBackground = fragmentView.findViewById(R.id.emojiBackground);
+        btnHideEmoji = fragmentView.findViewById(R.id.btnHideEmoji);
 
-        emojiFrame.setOnClickListener(view -> {
+        OnClickListener emojiClickListener = view -> {
             if (System.currentTimeMillis() - lastContentTapTime < 500) {
                 return;
             }
@@ -595,7 +597,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             if (emojiLoaded) {
                 expandEmoji(!emojiExpanded);
             }
-        });
+        };
+        emojiFrame.setOnClickListener(emojiClickListener);
+        btnHideEmoji.setOnClickListener(emojiClickListener);
 
         emojiRationalTextView = fragmentView.findViewById(R.id.emojiRationalTextView);
         emojiRationalTextView.setText(LocaleController.formatString("CallEmojiKeyTooltip", R.string.CallEmojiKeyTooltip, UserObject.getFirstName(callingUser)));
@@ -1012,6 +1016,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             int emojiFramePadding = AndroidUtilities.dp(24);
             emojiFrame.setPadding(emojiFramePadding, emojiFramePadding, emojiFramePadding, emojiFramePadding);
             emojiBackground.setVisibility(View.VISIBLE);
+            btnHideEmoji.setVisibility(View.VISIBLE);
             emojiRationalTextView.setVisibility(View.VISIBLE);
             emojiEncriptionTextView.setVisibility(View.VISIBLE);
             callingUserPhotoView.setVisibility(View.GONE);
@@ -1030,6 +1035,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             emojiFrameLP.topMargin = AndroidUtilities.dp(12);
             emojiFrame.setPadding(0, 0, 0, 0);
             emojiBackground.setVisibility(View.GONE);
+            btnHideEmoji.setVisibility(View.GONE);
             emojiRationalTextView.setVisibility(View.GONE);
             emojiEncriptionTextView.setVisibility(View.GONE);
             callingUserPhotoView.setVisibility(View.VISIBLE);
@@ -1612,7 +1618,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                         emojiViews[i].animate()
                                 .scaleX(1f)
                                 .scaleY(1f)
-                                .setDuration(200)
+                                .setDuration(350)
                                 .setInterpolator(new OvershootInterpolator()).start();
                     }
                 }

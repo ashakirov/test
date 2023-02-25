@@ -160,6 +160,27 @@
 
     </org.telegram.ui.Call.VoIPStatusLayout>
 
+    <TextView
+        android:id="@+id/btnHideEmoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/voip_hideemoji_bg"
+        android:paddingLeft="16dp"
+        android:paddingTop="4dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="4dp"
+        android:text="Hide Emoji"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="14dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topInsetView"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"/>
+
     <View
         android:id="@+id/emojiBackground"
         android:layout_width="0dp"
@@ -177,12 +198,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:clickable="true"
+        android:clipToPadding="false"
         android:focusable="true"
         android:orientation="vertical"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topInsetView"
-        android:clipToPadding="false">
+        app:layout_constraintTop_toBottomOf="@id/topInsetView">
 
         <LinearLayout
             android:id="@+id/emojiLayout"
@@ -203,6 +224,7 @@
             android:text="This call is end-to end encrypted"
             android:textColor="@android:color/white"
             android:textSize="16dp"
+            android:textStyle="bold"
             android:visibility="gone" />
 
         <TextView
