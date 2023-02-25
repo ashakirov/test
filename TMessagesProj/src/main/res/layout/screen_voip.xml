@@ -166,6 +166,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:background="@drawable/voip_hideemoji_bg"
+        android:clickable="true"
+        android:focusable="true"
         android:paddingLeft="16dp"
         android:paddingTop="4dp"
         android:paddingRight="16dp"
@@ -174,12 +176,10 @@
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textSize="14dp"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topInsetView"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"/>
+        app:layout_constraintTop_toBottomOf="@id/topInsetView" />
 
     <View
         android:id="@+id/emojiBackground"
@@ -198,9 +198,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:clickable="true"
+        android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
         android:orientation="vertical"
+        android:gravity="center_horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topInsetView">
@@ -209,7 +211,7 @@
             android:id="@+id/emojiLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:clipChildren="false"
             android:clipToPadding="false"
             android:orientation="horizontal" />
 

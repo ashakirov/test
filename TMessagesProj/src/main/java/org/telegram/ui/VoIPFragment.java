@@ -18,6 +18,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.PowerManager;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +42,10 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.transition.AutoTransition;
 import androidx.transition.ChangeBounds;
+import androidx.transition.ChangeImageTransform;
+import androidx.transition.ChangeTransform;
 import androidx.transition.Fade;
+import androidx.transition.Slide;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
 import androidx.transition.TransitionValues;
@@ -74,6 +78,7 @@ import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
 import org.telegram.ui.Call.VoIpBackgroundView;
 import org.telegram.ui.Call.transition.InsetColorTransition;
 import org.telegram.ui.Call.transition.InsetColorTransition.Type;
+import org.telegram.ui.Call.transition.Scale;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.BackupImageView;
@@ -998,9 +1003,41 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
         emojiExpanded = expanded;
 
-        TransitionManager.beginDelayedTransition(fragmentView, new AutoTransition());
+        TransitionSet set = new TransitionSet();
+        Fade btnHideEmojiFade = new Fade();
+        btnHideEmojiFade.addTarget(btnHideEmoji);
+        set.addTransition(btnHideEmojiFade);
+
+        TransitionSet bgSet = new TransitionSet();
+        bgSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
+        bgSet.addTransition(new Slide(Gravity.TOP));
+        bgSet.addTransition(new Scale(0.2f, true));
+        bgSet.addTransition(new Fade());
+        bgSet.addTarget(emojiBackground);
+        bgSet.addTarget(emojiRationalTextView);
+        bgSet.addTarget(emojiEncriptionTextView);
+        set.addTransition(bgSet);
+
+        TransitionSet emojiSet = new TransitionSet();
+        emojiSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
+        emojiSet.addTransition(new ChangeImageTransform());
+        emojiSet.addTransition(new ChangeBounds());
+        for (ImageView emojiView : emojiViews) {
+            emojiSet.addTarget(emojiView);
+        }
+        set.addTransition(emojiSet);
+
+        ChangeBounds changeBounds = new ChangeBounds();
+        changeBounds.addTarget(emojiLayout);
+        changeBounds.addTarget(emojiFrame);
+        changeBounds.addTarget(emojiLayout);
+        changeBounds.addTarget(statusLayout);
+        set.addTransition(changeBounds);
+
+        TransitionManager.beginDelayedTransition(fragmentView, set);
 
         ConstraintLayout.LayoutParams emojiFrameLP = (ConstraintLayout.LayoutParams) emojiFrame.getLayoutParams();
+        int emojiFramePadding = AndroidUtilities.dp(24);
         if (expanded) {
             for (int i = 0; i < emojiViews.length; i++) {
                 ImageView emoji = emojiViews[i];
@@ -1011,9 +1048,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     emojiLP.leftMargin = AndroidUtilities.dp(EMOJI_BIG_HOR_PADDING);
                 }
             }
-            emojiFrameLP.width = AndroidUtilities.dp(300);
             emojiFrameLP.topMargin = AndroidUtilities.dp(120);
-            int emojiFramePadding = AndroidUtilities.dp(24);
             emojiFrame.setPadding(emojiFramePadding, emojiFramePadding, emojiFramePadding, emojiFramePadding);
             emojiBackground.setVisibility(View.VISIBLE);
             btnHideEmoji.setVisibility(View.VISIBLE);
@@ -1031,16 +1066,16 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     emojiLP.leftMargin = AndroidUtilities.dp(EMOJI_HOR_PADDING);
                 }
             }
-            emojiFrameLP.width = LayoutParams.WRAP_CONTENT;
             emojiFrameLP.topMargin = AndroidUtilities.dp(12);
-            emojiFrame.setPadding(0, 0, 0, 0);
+            emojiFrame.setPadding(emojiFramePadding, 0, emojiFramePadding, emojiFramePadding);
             emojiBackground.setVisibility(View.GONE);
             btnHideEmoji.setVisibility(View.GONE);
-            emojiRationalTextView.setVisibility(View.GONE);
-            emojiEncriptionTextView.setVisibility(View.GONE);
+            emojiRationalTextView.setVisibility(View.INVISIBLE);
+            emojiEncriptionTextView.setVisibility(View.INVISIBLE);
             callingUserPhotoView.setVisibility(View.VISIBLE);
             callingUserPhoto.setVisibility(View.VISIBLE);
         }
+        emojiLayout.requestLayout();
         emojiFrame.requestLayout();
     }
 
