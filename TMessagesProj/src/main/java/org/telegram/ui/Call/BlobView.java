@@ -20,6 +20,7 @@ public class BlobView extends View {
 
     private BlobDrawable innerWave, outerWave;
     public int waveAmplitude;
+    private boolean isInited = false;
 
     public static final Property<BlobView, Integer> PROPERTY_INNER_RADIUS = new Property<BlobView, Integer>(Integer.class, "innerWaveRadius") {
         public Integer get(BlobView object) {
@@ -79,6 +80,7 @@ public class BlobView extends View {
         outerWave = new BlobDrawable(12, outerWaveRadius, maxAmplitude);
         outerWave.generateBlob();
         outerWave.paint.setColor(outerWaveColor);
+        isInited = true;
     }
 
 
@@ -88,7 +90,7 @@ public class BlobView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (getWidth() == 0 || getHeight() == 0) {
+        if (!isInited || getWidth() == 0 || getHeight() == 0) {
             return;
         }
         dt = System.currentTimeMillis() - lastUpdateTime;

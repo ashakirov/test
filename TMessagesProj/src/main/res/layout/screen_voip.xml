@@ -250,13 +250,76 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <org.telegram.ui.Components.voip.AcceptDeclineView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/acceptDeclineView"
         android:layout_width="match_parent"
         android:layout_height="186dp"
         app:layout_constraintBottom_toTopOf="@id/bottomInsetView"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <org.telegram.ui.Call.BlobView
+            android:id="@+id/acceptCallBlob"
+            android:layout_width="108dp"
+            android:layout_height="108dp"
+            app:layout_constraintBottom_toBottomOf="@id/acceptCall"
+            app:layout_constraintLeft_toLeftOf="@id/acceptCall"
+            app:layout_constraintRight_toRightOf="@id/acceptCall"
+            app:layout_constraintTop_toTopOf="@id/acceptCall" />
+
+        <ImageView
+            android:id="@+id/acceptCall"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_marginLeft="50dp"
+            android:background="@drawable/voip_acceptcall_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/white_circle_ripple"
+            android:padding="16dp"
+            android:src="@drawable/ic_call"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/acceptCallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="@android:color/white"
+            android:textSize="12dp"
+            app:layout_constraintLeft_toLeftOf="@id/acceptCall"
+            app:layout_constraintRight_toRightOf="@id/acceptCall"
+            app:layout_constraintTop_toBottomOf="@id/acceptCall" />
+
+        <ImageView
+            android:id="@+id/declineCall"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:layout_marginRight="50dp"
+            android:background="@drawable/voip_declinecall_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/white_circle_ripple"
+            android:padding="14dp"
+            android:src="@drawable/calls_decline"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/declineCallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="@android:color/white"
+            android:textSize="12dp"
+            app:layout_constraintLeft_toLeftOf="@id/declineCall"
+            app:layout_constraintRight_toRightOf="@id/declineCall"
+            app:layout_constraintTop_toBottomOf="@id/declineCall" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/backIcon"

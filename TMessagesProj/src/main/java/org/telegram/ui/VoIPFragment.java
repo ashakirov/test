@@ -79,7 +79,6 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.HintView;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.voip.AcceptDeclineView;
 import org.telegram.ui.Components.voip.PrivateVideoPreviewDialog;
 import org.telegram.ui.Components.voip.VoIPButtonsLayout;
 import org.telegram.ui.Components.voip.VoIPFloatingLayout;
@@ -152,7 +151,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private VoIPTextureView callingUserTextureView;
     private VoIPTextureView currentUserTextureView;
 
-    private AcceptDeclineView acceptDeclineView;
+    private View acceptDeclineView;
+    private TextView acceptCallText;
+    private BlobView btnAcceptCallBlob;
 
     View bottomShadow;
     View topShadow;
@@ -623,49 +624,24 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             bottomButtons[i] = new VoIPToggleButton(context);
             buttonsLayout.addView(bottomButtons[i]);
         }
-        acceptDeclineView = fragmentView.findViewById(R.id.acceptDeclineView);
-        acceptDeclineView.setListener(new AcceptDeclineView.Listener() {
-            @Override
-            public void onAccept() {
-                if (currentState == VoIPService.STATE_BUSY) {
-                    Intent intent = new Intent(activity, VoIPService.class);
-                    intent.putExtra("user_id", callingUser.id);
-                    intent.putExtra("is_outgoing", true);
-                    intent.putExtra("start_incall_activity", false);
-                    intent.putExtra("video_call", isVideoCall);
-                    intent.putExtra("can_video_call", isVideoCall);
-                    intent.putExtra("account", currentAccount);
-                    try {
-                        activity.startService(intent);
-                    } catch (Throwable e) {
-                        FileLog.e(e);
-                    }
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                        activity.requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 101);
-                    } else {
-                        if (VoIPService.getSharedInstance() != null) {
-                            VoIPService.getSharedInstance().acceptIncomingCall();
-                            if (currentUserIsVideo) {
-                                VoIPService.getSharedInstance().requestVideoCall(false);
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onDecline() {
-                if (currentState == VoIPService.STATE_BUSY) {
-                    windowView.finish();
-                } else {
-                    if (VoIPService.getSharedInstance() != null) {
-                        VoIPService.getSharedInstance().declineIncomingCall();
-                    }
-                }
-            }
+        View btnAcceptCall = fragmentView.findViewById(R.id.acceptCall);
+        btnAcceptCall.setOnClickListener(v -> {
+            onClickAcceptCall();
         });
-        acceptDeclineView.setScreenWasWakeup(screenWasWakeup);
+        View btnDeclineCall = fragmentView.findViewById(R.id.declineCall);
+        btnDeclineCall.setOnClickListener(v -> {
+            onClickDeclineCall();
+        });
+        btnAcceptCallBlob = fragmentView.findViewById(R.id.acceptCallBlob);
+        btnAcceptCallBlob.init(AndroidUtilities.dp(40), AndroidUtilities.dp(50), AndroidUtilities.dp(3), 0x24ffffff, 0x14ffffff);
+
+        acceptCallText = fragmentView.findViewById(R.id.acceptCallText);
+        setRetryMode(false);
+
+        TextView declineCallText = fragmentView.findViewById(R.id.declineCallText);
+        declineCallText.setText(LocaleController.getString("DeclineCall", R.string.DeclineCall));
+
+        acceptDeclineView = fragmentView.findViewById(R.id.acceptDeclineView);
 
         backIcon = fragmentView.findViewById(R.id.backIcon);
         backIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));
@@ -725,6 +701,44 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         return fragmentView;
+    }
+
+    private void onClickDeclineCall() {
+        if (currentState == VoIPService.STATE_BUSY) {
+            windowView.finish();
+        } else {
+            if (VoIPService.getSharedInstance() != null) {
+                VoIPService.getSharedInstance().declineIncomingCall();
+            }
+        }
+    }
+
+    private void onClickAcceptCall() {
+        if (currentState == VoIPService.STATE_BUSY) {
+            Intent intent = new Intent(activity, VoIPService.class);
+            intent.putExtra("user_id", callingUser.id);
+            intent.putExtra("is_outgoing", true);
+            intent.putExtra("start_incall_activity", false);
+            intent.putExtra("video_call", isVideoCall);
+            intent.putExtra("can_video_call", isVideoCall);
+            intent.putExtra("account", currentAccount);
+            try {
+                activity.startService(intent);
+            } catch (Throwable e) {
+                FileLog.e(e);
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                activity.requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 101);
+            } else {
+                if (VoIPService.getSharedInstance() != null) {
+                    VoIPService.getSharedInstance().acceptIncomingCall();
+                    if (currentUserIsVideo) {
+                        VoIPService.getSharedInstance().requestVideoCall(false);
+                    }
+                }
+            }
+        }
     }
 
     private VoIPTextureView getFullscreenTextureView() {
@@ -1060,7 +1074,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 showAcceptDeclineView = true;
                 lockOnScreen = true;
                 statusLayoutOffset = AndroidUtilities.dp(24);
-                acceptDeclineView.setRetryMod(false);
+                setRetryMode(false);
                 if (service != null && service.privateCall.video) {
                     if (currentUserIsVideo && callingUser.photo != null) {
                         showCallingAvatarMini = true;
@@ -1095,7 +1109,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             case VoIPService.STATE_BUSY:
                 showAcceptDeclineView = true;
                 statusTextView.setText(LocaleController.getString("VoipBusy", R.string.VoipBusy), false, animated);
-                acceptDeclineView.setRetryMod(true);
+                setRetryMode(true);
                 currentUserIsVideo = false;
                 callingUserIsVideo = false;
                 break;
@@ -1374,6 +1388,16 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserMiniFloatingLayout.restoreRelativePosition();
 
         updateSpeakerPhoneIcon();
+    }
+
+    private void setRetryMode(boolean isRetryMode) {
+        if (isRetryMode) {
+            btnAcceptCallBlob.setVisibility(View.GONE);
+            acceptCallText.setText(LocaleController.getString("RetryCall", R.string.RetryCall));
+        } else {
+            btnAcceptCallBlob.setVisibility(View.VISIBLE);
+            acceptCallText.setText(LocaleController.getString("AcceptCall", R.string.AcceptCall));
+        }
     }
 
     private void fillNavigationBar(boolean fill, boolean animated) {
