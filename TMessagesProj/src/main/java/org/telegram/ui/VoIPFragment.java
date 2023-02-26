@@ -34,13 +34,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.transition.ChangeBounds;
-import androidx.transition.ChangeImageTransform;
 import androidx.transition.Fade;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
@@ -73,13 +71,10 @@ import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
 import org.telegram.ui.Call.VoIPTransitions;
 import org.telegram.ui.Call.VoIpBackgroundView;
-import org.telegram.ui.Call.transition.BlobVisibility;
 import org.telegram.ui.Call.transition.InsetColorTransition;
 import org.telegram.ui.Call.transition.InsetColorTransition.Type;
-import org.telegram.ui.Call.transition.Scale;
-import org.telegram.ui.Call.transition.Slide;
 import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.BackgroundGradientDrawable;
+import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.HintView;
@@ -527,16 +522,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserTextureView.renderer.setRotateTextureWithScreen(true);
         callingUserTextureView.scaleType = VoIPTextureView.SCALE_TYPE_FIT;
 
-        final BackgroundGradientDrawable gradientDrawable = new BackgroundGradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xFF1b354e, 0xFF255b7d});
-        final BackgroundGradientDrawable.Sizes sizes = BackgroundGradientDrawable.Sizes.ofDeviceScreen(BackgroundGradientDrawable.Sizes.Orientation.PORTRAIT);
-        gradientDrawable.startDithering(sizes, new BackgroundGradientDrawable.ListenerAdapter() {
-            @Override
-            public void onAllSizesReady() {
-                callingUserPhotoBlobView.invalidate();
-            }
-        });
-
-        callingUserPhoto.setImage(ImageLocation.getForUserOrChat(callingUser, ImageLocation.TYPE_BIG), null, gradientDrawable, callingUser);
+        AvatarDrawable avatarDrawable = new AvatarDrawable();
+        avatarDrawable.setInfo(callingUser);
+        callingUserPhoto.setForUserOrChat(callingUser, avatarDrawable);
 
         currentUserCameraFloatingLayout = fragmentView.findViewById(R.id.currentUserCameraFloatingLayout);
         currentUserCameraFloatingLayout.setDelegate((progress, value) -> currentUserTextureView.setScreenshareMiniProgress(progress, value));
