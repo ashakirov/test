@@ -151,9 +151,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private VoIPTextureView callingUserTextureView;
     private VoIPTextureView currentUserTextureView;
 
-    private View acceptDeclineView;
-    private TextView acceptCallText;
+    private ViewGroup acceptDeclineView;
+    private TextView acceptCallText, declineCallText;
     private BlobView btnAcceptCallBlob;
+    private View btnDeclineCall, btnAcceptCall;
+    boolean isAcceptDeclineShowed = true;
+    boolean isRetryMode = false;
 
     View bottomShadow;
     View topShadow;
@@ -624,11 +627,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             bottomButtons[i] = new VoIPToggleButton(context);
             buttonsLayout.addView(bottomButtons[i]);
         }
-        View btnAcceptCall = fragmentView.findViewById(R.id.acceptCall);
+        btnAcceptCall = fragmentView.findViewById(R.id.acceptCall);
         btnAcceptCall.setOnClickListener(v -> {
             onClickAcceptCall();
         });
-        View btnDeclineCall = fragmentView.findViewById(R.id.declineCall);
+        btnDeclineCall = fragmentView.findViewById(R.id.declineCall);
         btnDeclineCall.setOnClickListener(v -> {
             onClickDeclineCall();
         });
@@ -636,9 +639,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         btnAcceptCallBlob.init(AndroidUtilities.dp(40), AndroidUtilities.dp(50), AndroidUtilities.dp(3), 0x24ffffff, 0x14ffffff);
 
         acceptCallText = fragmentView.findViewById(R.id.acceptCallText);
-        setRetryMode(false);
+        acceptCallText.setText(LocaleController.getString("AcceptCall", R.string.AcceptCall));
 
-        TextView declineCallText = fragmentView.findViewById(R.id.declineCallText);
+        declineCallText = fragmentView.findViewById(R.id.declineCallText);
         declineCallText.setText(LocaleController.getString("DeclineCall", R.string.DeclineCall));
 
         acceptDeclineView = fragmentView.findViewById(R.id.acceptDeclineView);
@@ -1082,10 +1085,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                         showCallingAvatarMini = false;
                     }
                     statusTextView.setText(LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding), true, animated);
-                    acceptDeclineView.setTranslationY(-AndroidUtilities.dp(60));
                 } else {
                     statusTextView.setText(LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding), true, animated);
-                    acceptDeclineView.setTranslationY(0);
                 }
                 break;
             case VoIPService.STATE_WAIT_INIT:
@@ -1127,66 +1128,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 break;
             case VoIPService.STATE_FAILED:
                 statusTextView.setText(LocaleController.getString("VoipFailed", R.string.VoipFailed), false, animated);
-                final VoIPService voipService = VoIPService.getSharedInstance();
-                final String lastError = voipService != null ? voipService.getLastError() : Instance.ERROR_UNKNOWN;
-                if (!TextUtils.equals(lastError, Instance.ERROR_UNKNOWN)) {
-                    if (TextUtils.equals(lastError, Instance.ERROR_INCOMPATIBLE)) {
-                        final String name = ContactsController.formatName(callingUser.first_name, callingUser.last_name);
-                        final String message = LocaleController.formatString("VoipPeerIncompatible", R.string.VoipPeerIncompatible, name);
-                        showErrorDialog(AndroidUtilities.replaceTags(message));
-                    } else if (TextUtils.equals(lastError, Instance.ERROR_PEER_OUTDATED)) {
-                        if (isVideoCall) {
-                            final String name = UserObject.getFirstName(callingUser);
-                            final String message = LocaleController.formatString("VoipPeerVideoOutdated", R.string.VoipPeerVideoOutdated, name);
-                            boolean[] callAgain = new boolean[1];
-                            AlertDialog dlg = new DarkAlertDialog.Builder(activity)
-                                    .setTitle(LocaleController.getString("VoipFailed", R.string.VoipFailed))
-                                    .setMessage(AndroidUtilities.replaceTags(message))
-                                    .setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialogInterface, i) -> windowView.finish())
-                                    .setPositiveButton(LocaleController.getString("VoipPeerVideoOutdatedMakeVoice", R.string.VoipPeerVideoOutdatedMakeVoice), (dialogInterface, i) -> {
-                                        callAgain[0] = true;
-                                        currentState = VoIPService.STATE_BUSY;
-                                        Intent intent = new Intent(activity, VoIPService.class);
-                                        intent.putExtra("user_id", callingUser.id);
-                                        intent.putExtra("is_outgoing", true);
-                                        intent.putExtra("start_incall_activity", false);
-                                        intent.putExtra("video_call", false);
-                                        intent.putExtra("can_video_call", false);
-                                        intent.putExtra("account", currentAccount);
-                                        try {
-                                            activity.startService(intent);
-                                        } catch (Throwable e) {
-                                            FileLog.e(e);
-                                        }
-                                    })
-                                    .show();
-                            dlg.setCanceledOnTouchOutside(true);
-                            dlg.setOnDismissListener(dialog -> {
-                                if (!callAgain[0]) {
-                                    windowView.finish();
-                                }
-                            });
-                        } else {
-                            final String name = UserObject.getFirstName(callingUser);
-                            final String message = LocaleController.formatString("VoipPeerOutdated", R.string.VoipPeerOutdated, name);
-                            showErrorDialog(AndroidUtilities.replaceTags(message));
-                        }
-                    } else if (TextUtils.equals(lastError, Instance.ERROR_PRIVACY)) {
-                        final String name = ContactsController.formatName(callingUser.first_name, callingUser.last_name);
-                        final String message = LocaleController.formatString("CallNotAvailable", R.string.CallNotAvailable, name);
-                        showErrorDialog(AndroidUtilities.replaceTags(message));
-                    } else if (TextUtils.equals(lastError, Instance.ERROR_AUDIO_IO)) {
-                        showErrorDialog("Error initializing audio hardware");
-                    } else if (TextUtils.equals(lastError, Instance.ERROR_LOCALIZED)) {
-                        windowView.finish();
-                    } else if (TextUtils.equals(lastError, Instance.ERROR_CONNECTION_SERVICE)) {
-                        showErrorDialog(LocaleController.getString("VoipErrorUnknown", R.string.VoipErrorUnknown));
-                    } else {
-                        AndroidUtilities.runOnUIThread(() -> windowView.finish(), 1000);
-                    }
-                } else {
-                    AndroidUtilities.runOnUIThread(() -> windowView.finish(), 1000);
-                }
+                processVoIPServiceError();
                 break;
         }
         if (previewDialog != null) {
@@ -1242,7 +1184,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         showCallingUserAvatarMini(showCallingAvatarMini, animated);
         statusLayoutOffset += callingUserPhotoViewMini.getTag() == null ? 0 : AndroidUtilities.dp(135) + AndroidUtilities.dp(12);
-        showAcceptDeclineView(showAcceptDeclineView, animated);
+        showAcceptDeclineView(showAcceptDeclineView);
         windowView.setLockOnScreen(lockOnScreen || deviceIsLocked);
         canHideUI = (currentState == VoIPService.STATE_ESTABLISHED) && (currentUserIsVideo || callingUserIsVideo);
         if (!canHideUI && !uiVisible) {
@@ -1390,14 +1332,71 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         updateSpeakerPhoneIcon();
     }
 
-    private void setRetryMode(boolean isRetryMode) {
-        if (isRetryMode) {
-            btnAcceptCallBlob.setVisibility(View.GONE);
-            acceptCallText.setText(LocaleController.getString("RetryCall", R.string.RetryCall));
+    private void processVoIPServiceError() {
+        final VoIPService voipService = VoIPService.getSharedInstance();
+        final String lastError = voipService != null ? voipService.getLastError() : Instance.ERROR_UNKNOWN;
+        if (!TextUtils.equals(lastError, Instance.ERROR_UNKNOWN)) {
+            if (TextUtils.equals(lastError, Instance.ERROR_INCOMPATIBLE)) {
+                final String name = ContactsController.formatName(callingUser.first_name, callingUser.last_name);
+                final String message = LocaleController.formatString("VoipPeerIncompatible", R.string.VoipPeerIncompatible, name);
+                showErrorDialog(AndroidUtilities.replaceTags(message));
+            } else if (TextUtils.equals(lastError, Instance.ERROR_PEER_OUTDATED)) {
+                if (isVideoCall) {
+                    showPeerOutdatedDialog();
+                } else {
+                    final String name = UserObject.getFirstName(callingUser);
+                    final String message = LocaleController.formatString("VoipPeerOutdated", R.string.VoipPeerOutdated, name);
+                    showErrorDialog(AndroidUtilities.replaceTags(message));
+                }
+            } else if (TextUtils.equals(lastError, Instance.ERROR_PRIVACY)) {
+                final String name = ContactsController.formatName(callingUser.first_name, callingUser.last_name);
+                final String message = LocaleController.formatString("CallNotAvailable", R.string.CallNotAvailable, name);
+                showErrorDialog(AndroidUtilities.replaceTags(message));
+            } else if (TextUtils.equals(lastError, Instance.ERROR_AUDIO_IO)) {
+                showErrorDialog("Error initializing audio hardware");
+            } else if (TextUtils.equals(lastError, Instance.ERROR_LOCALIZED)) {
+                windowView.finish();
+            } else if (TextUtils.equals(lastError, Instance.ERROR_CONNECTION_SERVICE)) {
+                showErrorDialog(LocaleController.getString("VoipErrorUnknown", R.string.VoipErrorUnknown));
+            } else {
+                AndroidUtilities.runOnUIThread(() -> windowView.finish(), 1000);
+            }
         } else {
-            btnAcceptCallBlob.setVisibility(View.VISIBLE);
-            acceptCallText.setText(LocaleController.getString("AcceptCall", R.string.AcceptCall));
+            AndroidUtilities.runOnUIThread(() -> windowView.finish(), 1000);
         }
+    }
+
+    private void showPeerOutdatedDialog() {
+        final String name = UserObject.getFirstName(callingUser);
+        final String message = LocaleController.formatString("VoipPeerVideoOutdated", R.string.VoipPeerVideoOutdated, name);
+        boolean[] callAgain = new boolean[1];
+        AlertDialog dlg = new DarkAlertDialog.Builder(activity)
+                .setTitle(LocaleController.getString("VoipFailed", R.string.VoipFailed))
+                .setMessage(AndroidUtilities.replaceTags(message))
+                .setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialogInterface, i) -> windowView.finish())
+                .setPositiveButton(LocaleController.getString("VoipPeerVideoOutdatedMakeVoice", R.string.VoipPeerVideoOutdatedMakeVoice), (dialogInterface, i) -> {
+                    callAgain[0] = true;
+                    currentState = VoIPService.STATE_BUSY;
+                    Intent intent = new Intent(activity, VoIPService.class);
+                    intent.putExtra("user_id", callingUser.id);
+                    intent.putExtra("is_outgoing", true);
+                    intent.putExtra("start_incall_activity", false);
+                    intent.putExtra("video_call", false);
+                    intent.putExtra("can_video_call", false);
+                    intent.putExtra("account", currentAccount);
+                    try {
+                        activity.startService(intent);
+                    } catch (Throwable e) {
+                        FileLog.e(e);
+                    }
+                })
+                .show();
+        dlg.setCanceledOnTouchOutside(true);
+        dlg.setOnDismissListener(dialog -> {
+            if (!callAgain[0]) {
+                windowView.finish();
+            }
+        });
     }
 
     private void fillNavigationBar(boolean fill, boolean animated) {
@@ -1648,31 +1647,39 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
     }
 
-    private void showAcceptDeclineView(boolean show, boolean animated) {
-        if (!animated) {
-            acceptDeclineView.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void setRetryMode(boolean isRetryMode) {
+        this.isRetryMode = isRetryMode;
+        if (isRetryMode) {
+            acceptCallText.setText(LocaleController.getString("RetryCall", R.string.RetryCall));
         } else {
-            if (show && acceptDeclineView.getTag() == null) {
-                acceptDeclineView.animate().setListener(null).cancel();
-                if (acceptDeclineView.getVisibility() == View.GONE) {
-                    acceptDeclineView.setVisibility(View.VISIBLE);
-                    acceptDeclineView.setAlpha(0);
-                }
-                acceptDeclineView.animate().alpha(1f);
-            }
-            if (!show && acceptDeclineView.getTag() != null) {
-                acceptDeclineView.animate().setListener(null).cancel();
-                acceptDeclineView.animate().setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        acceptDeclineView.setVisibility(View.GONE);
-                    }
-                }).alpha(0f);
-            }
+            acceptCallText.setText(LocaleController.getString("AcceptCall", R.string.AcceptCall));
         }
+    }
 
+    private void showAcceptDeclineView(boolean show) {
+        if (isAcceptDeclineShowed == show)
+            return;
+        isAcceptDeclineShowed = show;
+
+        TransitionSet resultSet = VoIPTransitions.acceptDeclineCallTransition(show, acceptCallText, declineCallText, btnAcceptCallBlob, btnAcceptCall, btnDeclineCall);
+        TransitionManager.beginDelayedTransition(acceptDeclineView, resultSet);
+
+        if (show) {
+            if (!isRetryMode) {
+                btnAcceptCallBlob.setVisibility(View.VISIBLE);
+            }
+            btnAcceptCall.setVisibility(View.VISIBLE);
+            acceptCallText.setVisibility(View.VISIBLE);
+            btnDeclineCall.setVisibility(View.VISIBLE);
+            declineCallText.setVisibility(View.VISIBLE);
+        } else {
+            btnAcceptCallBlob.setVisibility(View.GONE);
+            btnAcceptCall.setVisibility(View.GONE);
+            acceptCallText.setVisibility(View.GONE);
+            btnDeclineCall.setVisibility(View.GONE);
+            declineCallText.setVisibility(View.GONE);
+        }
         acceptDeclineView.setEnabled(show);
-        acceptDeclineView.setTag(show ? 1 : null);
     }
 
     private void updateButtons(boolean animated) {

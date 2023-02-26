@@ -85,4 +85,44 @@ public class VoIPTransitions {
         set.addTransition(changeBounds);
         return set;
     }
+
+    @NonNull
+    public static TransitionSet acceptDeclineCallTransition(boolean show, TextView acceptCallText1, TextView declineCallText1, BlobView btnAcceptCallBlob1, View btnAcceptCall1, View btnDeclineCall1) {
+        TransitionSet hideNonButtons = new TransitionSet();
+        hideNonButtons.setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+        Fade fade = new Fade();
+        fade.addTarget(acceptCallText1);
+        fade.addTarget(declineCallText1);
+        hideNonButtons.addTransition(fade);
+
+        BlobVisibility blobVisibility = new BlobVisibility(0);
+        blobVisibility.addTarget(btnAcceptCallBlob1);
+        blobVisibility.setDuration(150);
+        hideNonButtons.addTransition(blobVisibility);
+
+        TransitionSet buttonsSet = new TransitionSet();
+        buttonsSet.addTransition(new Fade());
+        buttonsSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+        Slide acceptBtnSlide = new Slide(AndroidUtilities.dp(140), -AndroidUtilities.dp(40));
+        acceptBtnSlide.addTarget(btnAcceptCall1);
+        buttonsSet.addTransition(acceptBtnSlide);
+
+        Slide declineBtnSlide = new Slide(AndroidUtilities.dp(140), AndroidUtilities.dp(40));
+        declineBtnSlide.addTarget(btnDeclineCall1);
+        buttonsSet.addTransition(declineBtnSlide);
+
+        TransitionSet resultSet = new TransitionSet();
+        resultSet.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+        resultSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
+        if (show) {
+            resultSet.addTransition(buttonsSet);
+            resultSet.addTransition(hideNonButtons);
+        } else {
+            resultSet.addTransition(hideNonButtons);
+            resultSet.addTransition(buttonsSet);
+        }
+        return resultSet;
+    }
 }
