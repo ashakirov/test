@@ -73,10 +73,11 @@ public class VoIpBackgroundView extends View {
         drawable.setParentView(this);
         drawable.setPatternAlpha(1f);
         drawable.setIndeterminateAnimation(true);
+        drawable.setIndeterminateSpeedScale(0.5f);
         return drawable;
     }
 
-    public void switchColors() {
+    public void switchColors(long duration) {
         if (switchColorAnimator != null) {
             switchColorAnimator.cancel();
         }
@@ -91,7 +92,7 @@ public class VoIpBackgroundView extends View {
             float progress = (float) animation.getAnimatedValue();
             currMotionDrawable.setBackgroundAlpha(progress);
         });
-        switchColorAnimator.setDuration(3000);
+        switchColorAnimator.setDuration(duration);
         switchColorAnimator.start();
     }
 
@@ -100,5 +101,6 @@ public class VoIpBackgroundView extends View {
             prevMotionDrawable.setIndeterminateAnimation(isRunning);
         }
         currMotionDrawable.setIndeterminateAnimation(isRunning);
+        invalidate();
     }
 }

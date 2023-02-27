@@ -115,6 +115,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int EMOJI_MARGIN_TOP = 12;
 
     private final int currentAccount;
+    private final int BG_CHANGE_DURATION = 5000;
 
     Activity activity;
 
@@ -223,15 +224,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private boolean screenWasWakeup;
     private boolean isVideoCall;
 
-    private final int FRAME_RATE = 30;
+    private final int FRAME_RATE = 60;
     private Timer timer = new Timer();
-    private boolean pauseContinuesAnimations = false;
-    private TimerTask updateContinuesAnimationTask = new TimerTask() {
-        @Override
-        public void run() {
-            tickContinuesAnimations();
-        }
-    };
+    private boolean isAnimationsPaused = false;
 
     public static void show(Activity activity, int account) {
         show(activity, false, account);
@@ -424,7 +419,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.closeInCallActivity);
 
-        stopContinuesAnimations();
+        stopAnimations();
     }
 
     @Override
@@ -440,7 +435,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     @Override
     public void onProximitySensor(boolean screenLocked) {
-        pauseContinuesAnimations(screenLocked);
+        setAnimationsPaused(screenLocked);
     }
 
     @Override
@@ -722,7 +717,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             initRenderers();
         }
 
-        startContinuesAnimations();
+        startAnimations();
 
         return fragmentView;
     }
@@ -2086,6 +2081,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 service.setVideoState(false, Instance.VIDEO_STATE_PAUSED);
             }
         }
+
+        setAnimationsPaused(true);
     }
 
     public void onResumeInternal() {
@@ -2103,6 +2100,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         deviceIsLocked = ((KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE)).inKeyguardRestrictedInputMode();
+        setAnimationsPaused(false);
     }
 
     private void showErrorDialog(CharSequence message) {
@@ -2129,24 +2127,45 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
     }
 
-    private void startContinuesAnimations() {
-        timer.schedule(updateContinuesAnimationTask, 0, 1000 / FRAME_RATE);
+    private void startAnimations() {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                AndroidUtilities.runOnUIThread(() -> tickAnimations());
+            }
+        }, 0, 1000 / FRAME_RATE);
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                AndroidUtilities.runOnUIThread(() -> setGradientBackground());
+            }
+        }, BG_CHANGE_DURATION, BG_CHANGE_DURATION);
     }
 
-    private void stopContinuesAnimations() {
+    private void stopAnimations() {
         timer.cancel();
     }
 
-    private void pauseContinuesAnimations(boolean pause) {
-        pauseContinuesAnimations = pause;
-        mainBackgroundView.setAnimationRunning(!pause);
+    private void setAnimationsPaused(boolean paused) {
+        isAnimationsPaused = paused;
+        mainBackgroundView.setAnimationRunning(!paused);
     }
 
-    private void tickContinuesAnimations() {
-        if (pauseContinuesAnimations) {
+    private void tickAnimations() {
+        if (isAnimationsPaused) {
             return;
         }
         btnAcceptCallBlob.tickAnimation();
         callingUserPhotoBlobView.tickAnimation();
+    }
+
+    private void setGradientBackground(){
+        if (isAnimationsPaused) {
+            return;
+        }
+        mainBackgroundView.post(() -> {
+            mainBackgroundView.switchColors(BG_CHANGE_DURATION);
+        });
     }
 }
