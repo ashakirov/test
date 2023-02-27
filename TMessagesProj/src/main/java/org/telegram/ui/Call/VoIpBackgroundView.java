@@ -94,4 +94,11 @@ public class VoIpBackgroundView extends View {
         switchColorAnimator.setDuration(3000);
         switchColorAnimator.start();
     }
+
+    public void setAnimationRunning(boolean isRunning){
+        if(prevMotionDrawable != null){
+            prevMotionDrawable.setIndeterminateAnimation(isRunning);
+        }
+        currMotionDrawable.setIndeterminateAnimation(isRunning);
+    }
 }

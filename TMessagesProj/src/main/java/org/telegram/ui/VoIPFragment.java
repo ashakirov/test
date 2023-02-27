@@ -95,6 +95,8 @@ import org.webrtc.RendererCommon;
 import org.webrtc.TextureViewRenderer;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class VoIPFragment implements VoIPService.StateListener, NotificationCenter.NotificationCenterDelegate {
 
@@ -220,6 +222,16 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private boolean lockOnScreen;
     private boolean screenWasWakeup;
     private boolean isVideoCall;
+
+    private final int FRAME_RATE = 30;
+    private Timer timer = new Timer();
+    private boolean pauseContinuesAnimations = false;
+    private TimerTask updateContinuesAnimationTask = new TimerTask() {
+        @Override
+        public void run() {
+            tickContinuesAnimations();
+        }
+    };
 
     public static void show(Activity activity, int account) {
         show(activity, false, account);
@@ -411,6 +423,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.voipServiceCreated);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.closeInCallActivity);
+
+        stopContinuesAnimations();
     }
 
     @Override
@@ -422,6 +436,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 updateViewState();
             }
         }
+    }
+
+    @Override
+    public void onProximitySensor(boolean screenLocked) {
+        pauseContinuesAnimations(screenLocked);
     }
 
     @Override
@@ -702,6 +721,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
             initRenderers();
         }
+
+        startContinuesAnimations();
 
         return fragmentView;
     }
@@ -2106,5 +2127,26 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 }
             }).show();
         }
+    }
+
+    private void startContinuesAnimations() {
+        timer.schedule(updateContinuesAnimationTask, 0, 1000 / FRAME_RATE);
+    }
+
+    private void stopContinuesAnimations() {
+        timer.cancel();
+    }
+
+    private void pauseContinuesAnimations(boolean pause) {
+        pauseContinuesAnimations = pause;
+        mainBackgroundView.setAnimationRunning(!pause);
+    }
+
+    private void tickContinuesAnimations() {
+        if (pauseContinuesAnimations) {
+            return;
+        }
+        btnAcceptCallBlob.tickAnimation();
+        callingUserPhotoBlobView.tickAnimation();
     }
 }

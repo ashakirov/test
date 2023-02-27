@@ -106,7 +106,9 @@ public class BlobView extends View {
 
         outerWave.update(dt);
         outerWave.draw(cx, cy, canvas);
+    }
 
+    public void tickAnimation() {
         if (!SharedConfig.getLiteMode().enabled()) {
             if (!innerWave.isCircle()) {
                 postDelayed(this::invalidate, 16);
