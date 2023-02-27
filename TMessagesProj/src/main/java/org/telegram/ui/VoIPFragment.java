@@ -636,7 +636,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             onClickDeclineCall();
         });
         btnAcceptCallBlob = fragmentView.findViewById(R.id.acceptCallBlob);
-        btnAcceptCallBlob.init(AndroidUtilities.dp(40), AndroidUtilities.dp(50), AndroidUtilities.dp(3), 0x24ffffff, 0x14ffffff);
+        btnAcceptCallBlob.init(AndroidUtilities.dp(38), AndroidUtilities.dp(48), AndroidUtilities.dp(3), 0x24ffffff, 0x14ffffff);
 
         acceptCallText = fragmentView.findViewById(R.id.acceptCallText);
         acceptCallText.setText(LocaleController.getString("AcceptCall", R.string.AcceptCall));
