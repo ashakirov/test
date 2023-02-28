@@ -562,7 +562,7 @@ void MediaManager::beginLevelsTimer(int timeoutMs) {
             return;
         }
 
-        float effectiveLevel = fmaxf(strong->_currentAudioLevel, strong->_currentMyAudioLevel);
+        float effectiveLevel = strong->_currentAudioLevel; //TODO ask devs// fmaxf(strong->_currentAudioLevel, strong->_currentMyAudioLevel);
         strong->_audioLevelUpdated(effectiveLevel);
 
         strong->beginLevelsTimer(100);
