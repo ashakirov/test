@@ -3697,6 +3697,9 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			}
 			isProximityNear = newIsNear;
 			try {
+				for (StateListener l : stateListeners) {
+					l.onProximitySensor(isProximityNear);
+				}
 				if (isProximityNear) {
 					proximityWakelock.acquire();
 				} else {
@@ -4405,6 +4408,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 
 		default void onScreenOnChange(boolean screenOn) {
+
+		}
+
+		default void onProximitySensor(boolean screenLocked){
 
 		}
 	}
