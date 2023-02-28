@@ -455,6 +455,10 @@ public class MotionBackgroundDrawable extends Drawable {
         invalidateParent();
     }
 
+    public float getBackgroundAlpha() {
+        return backgroundAlpha;
+    }
+
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);

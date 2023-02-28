@@ -71,6 +71,7 @@ import org.telegram.ui.Call.VoIPPinchZoomFrameLayout;
 import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
 import org.telegram.ui.Call.VoIPTransitions;
 import org.telegram.ui.Call.VoIpBackgroundView;
+import org.telegram.ui.Call.VoIpBackgroundView.State;
 import org.telegram.ui.Call.transition.InsetColorTransition;
 import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Components.AlertsCreator;
@@ -115,7 +116,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int EMOJI_MARGIN_TOP = 12;
 
     private final int currentAccount;
-    private final int BG_CHANGE_DURATION = 5000;
+    private final int BG_CHANGE_DURATION = 4000;
 
     Activity activity;
 
@@ -1071,8 +1072,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserPhotoBlobView.setVisibility(View.VISIBLE);
             callingUserPhoto.setVisibility(View.VISIBLE);
         }
-        emojiLayout.requestLayout();
-        emojiFrame.requestLayout();
     }
 
     private void updateViewState() {
@@ -1104,10 +1103,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 } else {
                     statusTextView.setText(LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding), true, animated);
                 }
+                setBackgroundState(State.NOT_ESTABLISHED);
                 break;
             case VoIPService.STATE_WAIT_INIT:
             case VoIPService.STATE_WAIT_INIT_ACK:
                 statusTextView.setText(LocaleController.getString("VoipConnecting", R.string.VoipConnecting), true, animated);
+                setBackgroundState(State.NOT_ESTABLISHED);
                 break;
             case VoIPService.STATE_EXCHANGING_KEYS:
                 statusTextView.setText(LocaleController.getString("VoipExchangingKeys", R.string.VoipExchangingKeys), true, animated);
@@ -1120,6 +1121,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 break;
             case VoIPService.STATE_REQUESTING:
                 statusTextView.setText(LocaleController.getString("VoipRequesting", R.string.VoipRequesting), true, animated);
+                setBackgroundState(State.NOT_ESTABLISHED);
                 break;
             case VoIPService.STATE_HANGING_UP:
                 break;
@@ -1127,22 +1129,28 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 showAcceptDeclineView = true;
                 statusTextView.setText(LocaleController.getString("VoipBusy", R.string.VoipBusy), false, animated);
                 setRetryMode(true);
+                setBackgroundState(State.NOT_ESTABLISHED);
                 currentUserIsVideo = false;
                 callingUserIsVideo = false;
                 break;
             case VoIPService.STATE_ESTABLISHED:
+                updateKeyView(animated);
+                showTimer = true;
+                setBackgroundState(State.CALL_ESTABLISHED);
+                break;
             case VoIPService.STATE_RECONNECTING:
                 updateKeyView(animated);
                 showTimer = true;
-                if (currentState == VoIPService.STATE_RECONNECTING) {
-                    showReconnecting = true;
-                }
+                showReconnecting = true;
+                setBackgroundState(State.WEAK_SIGNAL);
                 break;
             case VoIPService.STATE_ENDED:
                 currentUserTextureView.saveCameraLastBitmap();
+                setBackgroundState(State.NOT_ESTABLISHED);
                 AndroidUtilities.runOnUIThread(() -> windowView.finish(), 200);
                 break;
             case VoIPService.STATE_FAILED:
+                setBackgroundState(State.NOT_ESTABLISHED);
                 statusTextView.setText(LocaleController.getString("VoipFailed", R.string.VoipFailed), false, animated);
                 processVoIPServiceError();
                 break;
@@ -2167,5 +2175,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         mainBackgroundView.post(() -> {
             mainBackgroundView.switchColors(BG_CHANGE_DURATION);
         });
+    }
+
+    private void setBackgroundState(State state){
+        mainBackgroundView.setState(state);
     }
 }
