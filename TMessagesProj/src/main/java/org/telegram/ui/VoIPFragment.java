@@ -34,12 +34,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.FloatRange;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.transition.ChangeBounds;
 import androidx.transition.Fade;
+import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
 import androidx.transition.TransitionValues;
@@ -115,6 +117,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int EMOJI_BIG_MARGIN_TOP = 120;
     private final static int EMOJI_MARGIN_TOP = 12;
 
+    private final int USER_PHOTO_BLOB_INNER_RADIUS = AndroidUtilities.dp(78);
+    private final int USER_PHOTO_BLOB_OUTER_RADIUS = AndroidUtilities.dp(88);
+    private final int USER_PHOTO_BLOB_AMPLITUDE = AndroidUtilities.dp(8);
+
     private final int currentAccount;
     private final int BG_CHANGE_DURATION = 4000;
 
@@ -132,6 +138,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private BlobView callingUserPhotoBlobView;
     private BackupImageView callingUserPhoto;
     private BackupImageView callingUserPhotoViewMini;
+    @FloatRange(from = 0f, to = 1f)
+    private float micAmplitude = 0;
+    private float maxMicAmlitude = 1f;
+    private Transition userPhotoBlobTransition;
 
     private TextView callingUserTitle;
 
@@ -409,6 +419,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.voipServiceCreated);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.closeInCallActivity);
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
     }
 
     private void destroy() {
@@ -419,6 +430,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.voipServiceCreated);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.closeInCallActivity);
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
 
         stopAnimations();
     }
@@ -453,6 +465,20 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             updateKeyView(true);
         } else if (id == NotificationCenter.closeInCallActivity) {
             windowView.finish();
+        } else if (id == NotificationCenter.webRtcMicAmplitudeEvent) {
+            if (args != null && args.length > 0) {
+                float a = (float) args[0];
+                if (a > maxMicAmlitude) {
+                    maxMicAmlitude = Math.min(3, a);
+                    a = maxMicAmlitude;
+                }
+                a = a / maxMicAmlitude - 0.01f;
+                micAmplitude = Math.max(0, Math.min(a, 1));
+
+                if (micAmplitude > 0f) {
+                    animateUserPhotoBlobSize(micAmplitude);
+                }
+            }
         }
     }
 
@@ -530,7 +556,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         updateSystemBarColors();
 
         callingUserPhotoBlobView = fragmentView.findViewById(R.id.userPhotoBlobs);
-        callingUserPhotoBlobView.init(AndroidUtilities.dp(78), AndroidUtilities.dp(88), AndroidUtilities.dp(6), 0x24ffffff, 0x14ffffff);
+        callingUserPhotoBlobView.init(USER_PHOTO_BLOB_INNER_RADIUS, USER_PHOTO_BLOB_OUTER_RADIUS, USER_PHOTO_BLOB_AMPLITUDE, 0x24ffffff, 0x14ffffff);
 
         callingUserPhoto = fragmentView.findViewById(R.id.callingUserPhoto);
         callingUserPhoto.setRoundRadius(AndroidUtilities.dp(71));
@@ -2168,7 +2194,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserPhotoBlobView.tickAnimation();
     }
 
-    private void setGradientBackground(){
+    private void setGradientBackground() {
         if (isAnimationsPaused) {
             return;
         }
@@ -2177,7 +2203,23 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
     }
 
-    private void setBackgroundState(State state){
+    private void setBackgroundState(State state) {
         mainBackgroundView.setState(state);
+    }
+
+    private void animateUserPhotoBlobSize(float micAmplitude) {
+        if (isAnimationsPaused || callingUserPhotoBlobView.getVisibility() != View.VISIBLE || currentState != VoIPService.STATE_ESTABLISHED) {
+            return;
+        }
+        if (userPhotoBlobTransition == null) {
+            userPhotoBlobTransition = VoIPTransitions.getUserPhotoBlobSizeTransition(callingUserPhotoBlobView, USER_PHOTO_BLOB_INNER_RADIUS, USER_PHOTO_BLOB_OUTER_RADIUS);
+        }
+        TransitionManager.beginDelayedTransition(fragmentView, userPhotoBlobTransition);
+
+        if (callingUserPhotoBlobView != null) {
+            callingUserPhotoBlobView.setWaveAmplitude(USER_PHOTO_BLOB_AMPLITUDE);
+            callingUserPhotoBlobView.setInnerWaveRadius((int) (USER_PHOTO_BLOB_INNER_RADIUS * (1 + 0.3f * micAmplitude)));
+            callingUserPhotoBlobView.setOuterWaveRadius((int) (USER_PHOTO_BLOB_OUTER_RADIUS * (1 + 0.5f * micAmplitude)));
+        }
     }
 }

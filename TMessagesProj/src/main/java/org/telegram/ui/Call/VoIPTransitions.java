@@ -2,6 +2,7 @@ package org.telegram.ui.Call;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,9 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.transition.ChangeBounds;
 import androidx.transition.ChangeImageTransform;
 import androidx.transition.Fade;
+import androidx.transition.Transition;
 import androidx.transition.TransitionSet;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.ui.Call.transition.BlobAmplitudeTransition;
+import org.telegram.ui.Call.transition.BlobSizeTransition;
 import org.telegram.ui.Call.transition.BlobVisibility;
 import org.telegram.ui.Call.transition.Scale;
 import org.telegram.ui.Call.transition.Slide;
@@ -124,5 +128,16 @@ public class VoIPTransitions {
             resultSet.addTransition(buttonsSet);
         }
         return resultSet;
+    }
+
+    public static Transition getUserPhotoBlobSizeTransition(BlobView blobView, int innerRadius, int outerRadius) {
+        TransitionSet set = new TransitionSet();
+        BlobSizeTransition blobSizeTransition = new BlobSizeTransition(innerRadius, outerRadius);
+        blobSizeTransition.setInterpolator(new AccelerateDecelerateInterpolator());
+        blobSizeTransition.setDuration(200);
+        set.addTransition(blobSizeTransition);
+        set.addTransition(new BlobAmplitudeTransition().setDuration(3000));
+        set.addTarget(blobView);
+        return set;
     }
 }
