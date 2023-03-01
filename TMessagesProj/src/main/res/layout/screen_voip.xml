@@ -242,14 +242,6 @@
 
     </LinearLayout>
 
-    <org.telegram.ui.Components.voip.VoIPButtonsLayout
-        android:id="@+id/buttonsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/bottomInsetView"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/acceptDeclineView"
         android:layout_width="match_parent"
@@ -344,7 +336,23 @@
         android:layout_height="200dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="12dp"
         android:gravity="bottom"
+        app:layout_constraintBottom_toTopOf="@id/notificationsBottomBarrier"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/notificationsBottomBarrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="buttonsLayout,bottomInsetView" />
+
+    <org.telegram.ui.Components.voip.VoIPButtonsLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/bottomInsetView"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
