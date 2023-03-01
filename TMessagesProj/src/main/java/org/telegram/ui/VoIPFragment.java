@@ -442,6 +442,14 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             previousState = currentState;
             currentState = state;
             if (windowView != null) {
+
+                setBackgroundState(currentState);
+                switch (state) {
+                    case VoIPService.STATE_ESTABLISHED:
+                        startGreenBGAnimation();
+                        break;
+                }
+
                 updateViewState();
             }
         }
@@ -1130,12 +1138,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 } else {
                     statusTextView.setText(LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding), true, animated);
                 }
-                setBackgroundState(State.NOT_ESTABLISHED);
                 break;
             case VoIPService.STATE_WAIT_INIT:
             case VoIPService.STATE_WAIT_INIT_ACK:
                 statusTextView.setText(LocaleController.getString("VoipConnecting", R.string.VoipConnecting), true, animated);
-                setBackgroundState(State.NOT_ESTABLISHED);
                 break;
             case VoIPService.STATE_EXCHANGING_KEYS:
                 statusTextView.setText(LocaleController.getString("VoipExchangingKeys", R.string.VoipExchangingKeys), true, animated);
@@ -1148,7 +1154,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 break;
             case VoIPService.STATE_REQUESTING:
                 statusTextView.setText(LocaleController.getString("VoipRequesting", R.string.VoipRequesting), true, animated);
-                setBackgroundState(State.NOT_ESTABLISHED);
                 break;
             case VoIPService.STATE_HANGING_UP:
                 break;
@@ -1156,28 +1161,23 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 showAcceptDeclineView = true;
                 statusTextView.setText(LocaleController.getString("VoipBusy", R.string.VoipBusy), false, animated);
                 setRetryMode(true);
-                setBackgroundState(State.NOT_ESTABLISHED);
                 currentUserIsVideo = false;
                 callingUserIsVideo = false;
                 break;
             case VoIPService.STATE_ESTABLISHED:
                 updateKeyView(animated);
                 showTimer = true;
-                setBackgroundState(State.CALL_ESTABLISHED);
                 break;
             case VoIPService.STATE_RECONNECTING:
                 updateKeyView(animated);
                 showTimer = true;
                 showReconnecting = true;
-                setBackgroundState(State.WEAK_SIGNAL);
                 break;
             case VoIPService.STATE_ENDED:
                 currentUserTextureView.saveCameraLastBitmap();
-                setBackgroundState(State.NOT_ESTABLISHED);
                 AndroidUtilities.runOnUIThread(() -> windowView.finish(), 200);
                 break;
             case VoIPService.STATE_FAILED:
-                setBackgroundState(State.NOT_ESTABLISHED);
                 statusTextView.setText(LocaleController.getString("VoipFailed", R.string.VoipFailed), false, animated);
                 processVoIPServiceError();
                 break;
@@ -2204,16 +2204,31 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
     }
 
-    private void setBackgroundState(State state) {
-        mainBackgroundView.setState(state);
+    private void setBackgroundState(int state) {
+        State bgState;
+        if (state == VoIPService.STATE_ESTABLISHED) {
+            bgState = State.CALL_ESTABLISHED;
+        } else if (state == VoIPService.STATE_RECONNECTING) {
+            bgState = State.WEAK_SIGNAL;
+        } else {
+            bgState = State.NOT_ESTABLISHED;
+        }
+        mainBackgroundView.setState(bgState);
     }
 
     private void startGreenBGAnimation() {
-        int[] xy = new int[2];
-        btnAcceptCall.getLocationOnScreen(xy);
+        View targetView;
+        if(btnAcceptCall.getVisibility() == View.VISIBLE){
+            targetView = btnAcceptCall;
+        } else {
+            targetView = callingUserPhoto;
+        }
 
-        int x = xy[0] + btnAcceptCall.getWidth() / 2;
-        int y = xy[1] + btnAcceptCall.getHeight() / 2;
+        int[] xy = new int[2];
+        targetView.getLocationOnScreen(xy);
+
+        int x = xy[0] + targetView.getWidth() / 2;
+        int y = xy[1] + targetView.getHeight() / 2;
         mainBackgroundView.showGreenAnimation(x, y, BG_GREEN_CIRCLE_DURATION, BG_CHANGE_DURATION);
     }
 
