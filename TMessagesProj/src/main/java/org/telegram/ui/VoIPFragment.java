@@ -123,6 +123,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private final int currentAccount;
     private final int BG_CHANGE_DURATION = 4000;
+    private final int BG_GREEN_CIRCLE_DURATION = 500;
 
     Activity activity;
 
@@ -2205,6 +2206,15 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private void setBackgroundState(State state) {
         mainBackgroundView.setState(state);
+    }
+
+    private void startGreenBGAnimation() {
+        int[] xy = new int[2];
+        btnAcceptCall.getLocationOnScreen(xy);
+
+        int x = xy[0] + btnAcceptCall.getWidth() / 2;
+        int y = xy[1] + btnAcceptCall.getHeight() / 2;
+        mainBackgroundView.showGreenAnimation(x, y, BG_GREEN_CIRCLE_DURATION, BG_CHANGE_DURATION);
     }
 
     private void animateUserPhotoBlobSize(float micAmplitude) {

@@ -1,8 +1,11 @@
 package org.telegram.ui.Call;
 
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.view.View;
@@ -40,6 +43,14 @@ public class VoIpBackgroundView extends View {
 
     private MotionBackgroundDrawable weakSignalDrawable;
 
+    private MotionBackgroundDrawable greenDrawable;
+    private Path greenPath = new Path();
+    private int greenCircleX = 0;
+    private int greenCircleY = 0;
+    private int greenCircleRadius = 0;
+    private AnimatorSet showGreenAnimator;
+
+
     public VoIpBackgroundView(Context context) {
         super(context);
         init();
@@ -66,10 +77,15 @@ public class VoIpBackgroundView extends View {
 
         weakSignalDrawable = createMotionDrawable(orangeRed);
         weakSignalDrawable.setBackgroundAlpha(0f);
+
+        greenDrawable = createMotionDrawable(green);
+        greenDrawable.setBackgroundAlpha(0f);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
         if (weakSignalDrawable.getBackgroundAlpha() < 1f) {
             if (prevMotionDrawable != null) {
                 prevMotionDrawable.setBounds(0, 0, getWidth(), getHeight());
@@ -83,7 +99,15 @@ public class VoIpBackgroundView extends View {
             weakSignalDrawable.setBounds(0, 0, getWidth(), getHeight());
             weakSignalDrawable.drawBackground(canvas);
         }
-        super.onDraw(canvas);
+
+        if (greenDrawable.getBackgroundAlpha() > 0f) {
+            greenPath.rewind();
+            greenPath.addCircle(greenCircleX, greenCircleY, greenCircleRadius, Direction.CW);
+
+            canvas.clipPath(greenPath);
+            greenDrawable.setBounds(0, 0, getWidth(), getHeight());
+            greenDrawable.drawBackground(canvas);
+        }
     }
 
     private MotionBackgroundDrawable createMotionDrawable(int[] colors) {
@@ -117,6 +141,33 @@ public class VoIpBackgroundView extends View {
         switchColorAnimator.start();
     }
 
+    public void showGreenAnimation(int centerX, int centerY, long circleDuration, long alphaDuration) {
+        if (showGreenAnimator != null) {
+            showGreenAnimator.cancel();
+        }
+        greenDrawable.setBackgroundAlpha(1f);
+        greenCircleX = centerX;
+        greenCircleY = centerY;
+
+        int maxRadius = (int) Math.sqrt(getWidth() * getWidth() + getHeight() * getHeight());
+        ValueAnimator greenCircleAnimator = ValueAnimator.ofInt(0, maxRadius);
+        greenCircleAnimator.setDuration(circleDuration);
+        greenCircleAnimator.addUpdateListener(animation -> {
+            greenCircleRadius = (int) animation.getAnimatedValue();
+        });
+
+        ValueAnimator alpha = ValueAnimator.ofFloat(1f, 0f);
+        alpha.setDuration(alphaDuration);
+        alpha.addUpdateListener(animation -> {
+            float progress = (float) animation.getAnimatedValue();
+            greenDrawable.setBackgroundAlpha(progress);
+        });
+
+        showGreenAnimator = new AnimatorSet();
+        showGreenAnimator.playSequentially(greenCircleAnimator, alpha);
+        showGreenAnimator.start();
+    }
+
     private int getColorMaxIndex() {
         if (state == State.CALL_ESTABLISHED) {
             return COLORS.length;
@@ -145,6 +196,8 @@ public class VoIpBackgroundView extends View {
             prevMotionDrawable.setIndeterminateAnimation(isRunning);
         }
         currMotionDrawable.setIndeterminateAnimation(isRunning);
+        weakSignalDrawable.setIndeterminateAnimation(isRunning);
+        greenDrawable.setIndeterminateAnimation(isRunning);
         invalidate();
     }
 
