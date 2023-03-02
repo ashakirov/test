@@ -436,7 +436,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 setBackgroundState(currentState);
                 switch (state) {
                     case VoIPService.STATE_ESTABLISHED:
-                        startGreenBGAnimation();
+                        if (isOutgoing) {
+                            startGreenBGAnimation(callingUserPhoto);
+                        }
                         break;
                 }
 
@@ -1635,6 +1637,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             btnDeclineCall.setVisibility(View.VISIBLE);
             declineCallText.setVisibility(View.VISIBLE);
         } else {
+            if(!isOutgoing) {
+                startGreenBGAnimation(btnAcceptCall);
+            }
             btnAcceptCallBlob.setVisibility(View.GONE);
             btnAcceptCall.setVisibility(View.GONE);
             acceptCallText.setVisibility(View.GONE);
@@ -2097,14 +2102,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         mainBackgroundView.setState(bgState);
     }
 
-    private void startGreenBGAnimation() {
-        View targetView;
-        if(btnAcceptCall.getVisibility() == View.VISIBLE){
-            targetView = btnAcceptCall;
-        } else {
-            targetView = callingUserPhoto;
-        }
-
+    private void startGreenBGAnimation(View targetView) {
         int[] xy = new int[2];
         targetView.getLocationOnScreen(xy);
 
