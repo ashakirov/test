@@ -121,6 +121,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final int BG_CHANGE_DURATION = 4000;
     private final int BG_GREEN_CIRCLE_DURATION = 500;
 
+    private final int BTN_OFF_COLOR = Color.BLACK;
+
     Activity activity;
 
     TLRPC.User currentUser;
@@ -842,6 +844,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         buttonsLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         callingUserMiniFloatingLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         notificationsLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+        mainBackgroundView.setAlpha(0);
+        emojiLayout.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+        topShadow.animate().alpha(0).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+
+        showShadowViews(false);
 
         VoIPPiPView.switchingToPip = true;
         switchingToPip = true;
@@ -893,6 +900,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             buttonsLayout.setAlpha(0f);
             speakerPhoneIcon.setAlpha(0f);
             notificationsLayout.setAlpha(0f);
+            mainBackgroundView.setAlpha(0f);
+            emojiLayout.setAlpha(0f);
 
             currentUserCameraFloatingLayout.switchingToPip = true;
             AndroidUtilities.runOnUIThread(() -> {
@@ -904,6 +913,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 statusLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 buttonsLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 notificationsLayout.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+                mainBackgroundView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+                emojiLayout.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
 
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -1714,7 +1725,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private void setMicrohoneAction(VoIPToggleButton bottomButton, VoIPService service, boolean animated) {
         if (service.isMicMute()) {
-            bottomButton.setData(R.drawable.calls_unmute, Color.BLACK, Color.WHITE, LocaleController.getString("VoipUnmute", R.string.VoipUnmute), true, animated);
+            bottomButton.setData(R.drawable.calls_unmute, BTN_OFF_COLOR, Color.WHITE, LocaleController.getString("VoipUnmute", R.string.VoipUnmute), true, animated);
         } else {
             bottomButton.setData(R.drawable.calls_unmute, Color.WHITE, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipMute", R.string.VoipMute), false, animated);
         }
@@ -1750,7 +1761,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             if (currentUserIsVideo) {
                 bottomButton.setData(service.isScreencast() ? R.drawable.calls_sharescreen : R.drawable.calls_video, Color.WHITE, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipStopVideo", R.string.VoipStopVideo), false, animated);
             } else {
-                bottomButton.setData(R.drawable.calls_video, Color.BLACK, Color.WHITE, LocaleController.getString("VoipStartVideo", R.string.VoipStartVideo), true, animated);
+                bottomButton.setData(R.drawable.calls_video, BTN_OFF_COLOR, Color.WHITE, LocaleController.getString("VoipStartVideo", R.string.VoipStartVideo), true, animated);
             }
             bottomButton.setCrossOffset(-AndroidUtilities.dpf2(3.5f));
             bottomButton.setOnClickListener(view -> {
@@ -1802,7 +1813,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             bottomButton.setData(R.drawable.calls_bluetooth, Color.WHITE, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipAudioRoutingBluetooth", R.string.VoipAudioRoutingBluetooth), false, animated);
             bottomButton.setChecked(false, animated);
         } else if (service.isSpeakerphoneOn()) {
-            bottomButton.setData(R.drawable.calls_speaker, Color.BLACK, Color.WHITE, LocaleController.getString("VoipSpeaker", R.string.VoipSpeaker), false, animated);
+            bottomButton.setData(R.drawable.calls_speaker, BTN_OFF_COLOR, Color.WHITE, LocaleController.getString("VoipSpeaker", R.string.VoipSpeaker), false, animated);
             bottomButton.setChecked(true, animated);
         } else {
             bottomButton.setData(R.drawable.calls_speaker, Color.WHITE, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipSpeaker", R.string.VoipSpeaker), false, animated);
@@ -1825,7 +1836,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         } else {
             bottomButton.setEnabled(true);
             if (!service.isFrontFaceCamera()) {
-                bottomButton.setData(R.drawable.calls_flip, Color.BLACK, Color.WHITE, LocaleController.getString("VoipFlip", R.string.VoipFlip), false, animated);
+                bottomButton.setData(R.drawable.calls_flip, Color.TRANSPARENT, Color.WHITE, LocaleController.getString("VoipFlip", R.string.VoipFlip), false, animated);
             } else {
                 bottomButton.setData(R.drawable.calls_flip, Color.WHITE, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.12f)), LocaleController.getString("VoipFlip", R.string.VoipFlip), false, animated);
             }
