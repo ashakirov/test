@@ -27,8 +27,16 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.voip.VoIPButtonsLayout;
 import org.telegram.ui.Components.voip.VoIPNotificationsLayout;
+import org.telegram.ui.Components.voip.VoIPToggleButton;
 
 public class VoIPTransitions {
+
+    private static final int BTN_CALL_DELTA_Y = 110;
+    private static final int BTN_CALL_DELTA_X = 40;
+    private static final float BTN_CALL_MIN_SCALE = 0.7f;
+    private static final int CALM_DOWN_WAVES_TIME = 3000;
+    private static final int EMOJI_SLIDE_Y_DELTA = -AndroidUtilities.dp(150) ;
+
     @NonNull
     public static TransitionSet emojiExpandTransition(boolean expanded, View btnHideEmoji, View emojiBackground, TextView emojiRationalTextView, TextView emojiEncriptionTextView, ImageView[] emojiViews, BlobView callingUserPhotoBlobView, BackupImageView callingUserPhoto, LinearLayout emojiLayout, ViewGroup emojiFrame, View statusLayout) {
         TransitionSet set = new TransitionSet();
@@ -38,7 +46,7 @@ public class VoIPTransitions {
 
         TransitionSet bgSet = new TransitionSet();
         bgSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
-        bgSet.addTransition(new Slide(-AndroidUtilities.dp(150), 0f));
+        bgSet.addTransition(new Slide(EMOJI_SLIDE_Y_DELTA, 0f));
         bgSet.addTransition(new Scale(0.2f, true));
         bgSet.addTransition(new Fade());
         bgSet.setDuration(350);
@@ -113,21 +121,22 @@ public class VoIPTransitions {
         buttonsSet.addTransition(new Fade());
         buttonsSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
 
-        Slide acceptBtnSlide = new Slide(AndroidUtilities.dp(140), -AndroidUtilities.dp(40));
+        Slide acceptBtnSlide = new Slide(AndroidUtilities.dp(BTN_CALL_DELTA_Y), -AndroidUtilities.dp(BTN_CALL_DELTA_X));
         acceptBtnSlide.addTarget(btnAcceptCall1);
         buttonsSet.addTransition(acceptBtnSlide);
 
-        Slide declineBtnSlide = new Slide(AndroidUtilities.dp(140), AndroidUtilities.dp(40));
+        Slide declineBtnSlide = new Slide(AndroidUtilities.dp(BTN_CALL_DELTA_Y), AndroidUtilities.dp(BTN_CALL_DELTA_X));
         declineBtnSlide.addTarget(btnDeclineCall1);
         buttonsSet.addTransition(declineBtnSlide);
 
         TransitionSet resultSet = new TransitionSet();
-        resultSet.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
         resultSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
         if (show) {
+            resultSet.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
             resultSet.addTransition(buttonsSet);
             resultSet.addTransition(hideNonButtons);
         } else {
+            resultSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
             resultSet.addTransition(hideNonButtons);
             resultSet.addTransition(buttonsSet);
         }
@@ -140,7 +149,7 @@ public class VoIPTransitions {
         blobSizeTransition.setInterpolator(new AccelerateDecelerateInterpolator());
         blobSizeTransition.setDuration(200);
         set.addTransition(blobSizeTransition);
-        set.addTransition(new BlobAmplitudeTransition().setDuration(3000));
+        set.addTransition(new BlobAmplitudeTransition().setDuration(CALM_DOWN_WAVES_TIME));
         set.addTarget(blobView);
         return set;
     }
@@ -182,6 +191,20 @@ public class VoIPTransitions {
         set.addTransition(changeBounds);
         set.setInterpolator(CubicBezierInterpolator.DEFAULT);
 
+        return set;
+    }
+
+
+    @NonNull
+    public static Transition getButtonsShowTransition(VoIPToggleButton[] bottomButtons) {
+        TransitionSet set = new TransitionSet();
+        set.addTransition(new Slide(-AndroidUtilities.dp(BTN_CALL_DELTA_Y), 0));
+        set.addTransition(new Fade());
+        set.addTransition(new Scale(BTN_CALL_MIN_SCALE, true));
+        set.setInterpolator(CubicBezierInterpolator.DEFAULT);
+        for (VoIPToggleButton button : bottomButtons) {
+            set.addTarget(button);
+        }
         return set;
     }
 }
