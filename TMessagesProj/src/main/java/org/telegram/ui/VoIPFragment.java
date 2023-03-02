@@ -892,7 +892,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             buttonsLayout.setAlpha(0f);
             speakerPhoneIcon.setAlpha(0f);
             notificationsLayout.setAlpha(0f);
-            callingUserPhotoBlobView.setAlpha(0f);
 
             currentUserCameraFloatingLayout.switchingToPip = true;
             AndroidUtilities.runOnUIThread(() -> {
@@ -904,7 +903,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 statusLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 buttonsLayout.animate().alpha(1f).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 notificationsLayout.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-                callingUserPhotoBlobView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
 
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -989,11 +987,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserTextureView.setTranslationY(callingUserToY);
             callingUserTextureView.setRoundCorners(AndroidUtilities.dp(6) * 1f / callingUserToScale);
 
-            callingUserPhotoBlobView.setAlpha(0f);
-            callingUserPhotoBlobView.setScaleX(callingUserToScale);
-            callingUserPhotoBlobView.setScaleY(callingUserToScale);
-            callingUserPhotoBlobView.setTranslationX(callingUserToX);
-            callingUserPhotoBlobView.setTranslationY(callingUserToY);
         }
         ValueAnimator animator = ValueAnimator.ofFloat(enter ? 1f : 0, enter ? 0 : 1f);
 
@@ -1027,12 +1020,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             if (!currentUserCameraFloatingLayout.measuredAsFloatingMode) {
                 currentUserTextureView.setScreenshareMiniProgress(v, false);
             }
-
-            callingUserPhotoBlobView.setScaleX(callingUserScale);
-            callingUserPhotoBlobView.setScaleY(callingUserScale);
-            callingUserPhotoBlobView.setTranslationX(tx);
-            callingUserPhotoBlobView.setTranslationY(ty);
-            callingUserPhotoBlobView.setAlpha(1f - v);
         });
         return animator;
     }
@@ -1085,8 +1072,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             btnHideEmoji.setVisibility(View.GONE);
             emojiRationalTextView.setVisibility(View.GONE);
             emojiEncriptionTextView.setVisibility(View.GONE);
-            callingUserPhotoBlobView.setVisibility(View.VISIBLE);
-            callingUserPhoto.setVisibility(View.VISIBLE);
+
+            if (!currentUserIsVideo && !callingUserIsVideo) {
+                callingUserPhotoBlobView.setVisibility(View.VISIBLE);
+                callingUserPhoto.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -1174,9 +1164,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         if (callingUserIsVideo) {
-            if (!switchingToPip) {
-                callingUserPhotoBlobView.setAlpha(1f);
-            }
             if (animated) {
                 callingUserTextureView.animate().alpha(1f).setDuration(250).start();
             } else {
@@ -1190,8 +1177,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         if (currentUserIsVideo || callingUserIsVideo) {
             showShadowViews(true);
+            callingUserPhoto.setVisibility(View.GONE);
+            callingUserPhotoBlobView.setVisibility(View.GONE);
         } else {
             showShadowViews(false);
+            callingUserPhoto.setVisibility(View.VISIBLE);
             callingUserPhotoBlobView.setVisibility(View.VISIBLE);
             if (animated) {
                 callingUserTextureView.animate().alpha(0f).setDuration(250).start();
