@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.FloatRange;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -44,8 +45,6 @@ import androidx.transition.Fade;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
-import androidx.transition.TransitionValues;
-import androidx.transition.Visibility;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
@@ -74,8 +73,6 @@ import org.telegram.ui.Call.VoIPPinchZoomFrameLayout.CallBackgroundViewCallback;
 import org.telegram.ui.Call.VoIPTransitions;
 import org.telegram.ui.Call.VoIpBackgroundView;
 import org.telegram.ui.Call.VoIpBackgroundView.State;
-import org.telegram.ui.Call.transition.InsetColorTransition;
-import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
@@ -1192,9 +1189,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         if (currentUserIsVideo || callingUserIsVideo) {
-            fillNavigationBar(true, animated);
+            showShadowViews(true);
         } else {
-            fillNavigationBar(false, animated);
+            showShadowViews(false);
             callingUserPhotoBlobView.setVisibility(View.VISIBLE);
             if (animated) {
                 callingUserTextureView.animate().alpha(0f).setDuration(250).start();
@@ -1390,62 +1387,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         });
     }
 
-    private void fillNavigationBar(boolean fill, boolean animated) {
-        if (switchingToPip) {
-            return;
-        }
-
-        if (animated) {
-            TransitionSet set = new TransitionSet();
-            set.setOrdering(TransitionSet.ORDERING_TOGETHER);
-
-            InsetColorTransition topColorTransition = new InsetColorTransition(Type.TOP);
-            topColorTransition.addTarget(fragmentView);
-            set.addTransition(topColorTransition);
-
-            InsetColorTransition bottomColorTransition = new InsetColorTransition(Type.BOTTOM);
-            bottomColorTransition.addTarget(fragmentView);
-            set.addTransition(bottomColorTransition);
-
-            Fade fade = new Fade();
-            fade.addTarget(bottomShadow);
-            fade.addTarget(topShadow);
-            set.addTransition(fade);
-            set.setInterpolator(CubicBezierInterpolator.DEFAULT);
-
-            TransitionManager.beginDelayedTransition(fragmentView, set);
-        }
-
-        if (fill) {
-            fragmentView.setTopColor(topNavigationColor);
-            fragmentView.setBottomColor(bottomNavigationColor);
-            bottomShadow.setVisibility(View.VISIBLE);
-            topShadow.setVisibility(View.VISIBLE);
-        } else {
-            fragmentView.setTopColor(Color.TRANSPARENT);
-            fragmentView.setBottomColor(Color.TRANSPARENT);
-            bottomShadow.setVisibility(View.GONE);
-            topShadow.setVisibility(View.GONE);
-        }
-    }
-
     private void showUi(boolean show) {
-        TransitionSet set = new TransitionSet();
-        set.setOrdering(TransitionSet.ORDERING_TOGETHER);
-        Fade fade = new Fade();
-        fade.addTarget(speakerPhoneIcon);
-        fade.addTarget(backIcon);
-        fade.addTarget(statusLayout);
-        fade.addTarget(buttonsLayout);
-        fade.addTarget(emojiLayout);
-        fade.addTarget(notificationsLayout);
-        set.addTransition(fade);
-
-        ChangeBounds changeBounds = new ChangeBounds();
-        changeBounds.addTarget(notificationsLayout);
-        set.addTransition(changeBounds);
-        set.setInterpolator(CubicBezierInterpolator.DEFAULT);
-
+        TransitionSet set = VoIPTransitions.getShowUITransition(speakerPhoneIcon, backIcon, statusLayout, buttonsLayout, emojiLayout, notificationsLayout, notificationsLayout);
+        set.addTransition(VoIPTransitions.getShowShadowsTransition(fragmentView, bottomShadow, topShadow));
         TransitionManager.beginDelayedTransition(fragmentView, set);
 
         if (show) {
@@ -1466,12 +1410,28 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
             hideUiRunnableWaiting = false;
         }
+        showShadowViews(show);
+
         buttonsLayout.setEnabled(show);
 
         uiVisible = show;
         windowView.requestFullscreen(!show);
 
         moveFloatingLayouts();
+    }
+
+    private void showShadowViews(boolean show) {
+        if (show) {
+            fragmentView.setTopColor(topNavigationColor);
+            fragmentView.setBottomColor(bottomNavigationColor);
+            bottomShadow.setVisibility(View.VISIBLE);
+            topShadow.setVisibility(View.VISIBLE);
+        } else {
+            fragmentView.setTopColor(Color.TRANSPARENT);
+            fragmentView.setBottomColor(Color.TRANSPARENT);
+            bottomShadow.setVisibility(View.GONE);
+            topShadow.setVisibility(View.GONE);
+        }
     }
 
     private void moveFloatingLayouts() {

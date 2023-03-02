@@ -19,10 +19,14 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Call.transition.BlobAmplitudeTransition;
 import org.telegram.ui.Call.transition.BlobSizeTransition;
 import org.telegram.ui.Call.transition.BlobVisibility;
+import org.telegram.ui.Call.transition.InsetColorTransition;
+import org.telegram.ui.Call.transition.InsetColorTransition.Type;
 import org.telegram.ui.Call.transition.Scale;
 import org.telegram.ui.Call.transition.Slide;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
+import org.telegram.ui.Components.voip.VoIPButtonsLayout;
+import org.telegram.ui.Components.voip.VoIPNotificationsLayout;
 
 public class VoIPTransitions {
     @NonNull
@@ -138,6 +142,46 @@ public class VoIPTransitions {
         set.addTransition(blobSizeTransition);
         set.addTransition(new BlobAmplitudeTransition().setDuration(3000));
         set.addTarget(blobView);
+        return set;
+    }
+
+    public static Transition getShowShadowsTransition(ColoredInsetConstraintLayout insetView, View bottomShadow, View topShadow) {
+        TransitionSet set = new TransitionSet();
+        set.setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+        InsetColorTransition topColorTransition = new InsetColorTransition(Type.TOP);
+        topColorTransition.addTarget(insetView);
+        set.addTransition(topColorTransition);
+
+        InsetColorTransition bottomColorTransition = new InsetColorTransition(Type.BOTTOM);
+        bottomColorTransition.addTarget(insetView);
+        set.addTransition(bottomColorTransition);
+
+        Fade fade = new Fade();
+        fade.addTarget(bottomShadow);
+        fade.addTarget(topShadow);
+        set.addTransition(fade);
+        set.setInterpolator(CubicBezierInterpolator.DEFAULT);
+        return set;
+    }
+
+    public static TransitionSet getShowUITransition(ImageView speakerPhoneIcon1, ImageView backIcon1, LinearLayout statusLayout1, VoIPButtonsLayout buttonsLayout1, LinearLayout emojiLayout1, VoIPNotificationsLayout notificationsLayout1, VoIPNotificationsLayout notificationsLayout2) {
+        TransitionSet set = new TransitionSet();
+        set.setOrdering(TransitionSet.ORDERING_TOGETHER);
+        Fade fade = new Fade();
+        fade.addTarget(speakerPhoneIcon1);
+        fade.addTarget(backIcon1);
+        fade.addTarget(statusLayout1);
+        fade.addTarget(buttonsLayout1);
+        fade.addTarget(emojiLayout1);
+        fade.addTarget(notificationsLayout1);
+        set.addTransition(fade);
+
+        ChangeBounds changeBounds = new ChangeBounds();
+        changeBounds.addTarget(notificationsLayout2);
+        set.addTransition(changeBounds);
+        set.setInterpolator(CubicBezierInterpolator.DEFAULT);
+
         return set;
     }
 }
