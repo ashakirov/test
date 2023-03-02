@@ -1176,11 +1176,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         }
 
-        if (animated) {
-            currentUserCameraFloatingLayout.saveRelativePosition();
-            callingUserMiniFloatingLayout.saveRelativePosition();
-        }
-
         if (callingUserIsVideo) {
             if (!switchingToPip) {
                 callingUserPhotoBlobView.setAlpha(1f);
@@ -1243,7 +1238,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         canSwitchToPip = (currentState != VoIPService.STATE_ENDED && currentState != VoIPService.STATE_BUSY) && (currentUserIsVideo || callingUserIsVideo);
 
-        int floatingViewsOffset;
         if (service != null) {
             if (currentUserIsVideo) {
                 service.sharedUIParams.tapToVideoTooltipWasShowed = true;
@@ -1287,12 +1281,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         }
 
-        floatingViewsOffset = notificationsLayout.getChildsHight();
-
-        callingUserMiniFloatingLayout.setBottomOffset(floatingViewsOffset, animated);
-        currentUserCameraFloatingLayout.setBottomOffset(floatingViewsOffset, animated);
-        currentUserCameraFloatingLayout.setUiVisible(uiVisible);
-        callingUserMiniFloatingLayout.setUiVisible(uiVisible);
+        moveFloatingLayouts();
 
         if (currentUserIsVideo) {
             if (!callingUserIsVideo || cameraForceExpanded) {
@@ -1455,6 +1444,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         ChangeBounds changeBounds = new ChangeBounds();
         changeBounds.addTarget(notificationsLayout);
         set.addTransition(changeBounds);
+        set.setInterpolator(CubicBezierInterpolator.DEFAULT);
 
         TransitionManager.beginDelayedTransition(fragmentView, set);
 
@@ -1480,6 +1470,19 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         uiVisible = show;
         windowView.requestFullscreen(!show);
+
+        moveFloatingLayouts();
+    }
+
+    private void moveFloatingLayouts() {
+        currentUserCameraFloatingLayout.saveRelativePosition();
+        callingUserMiniFloatingLayout.saveRelativePosition();
+        callingUserMiniFloatingLayout.setBottomOffset(notificationsLayout.getChildsHight(), true);
+        currentUserCameraFloatingLayout.setBottomOffset(notificationsLayout.getChildsHight(), true);
+        currentUserCameraFloatingLayout.setUiVisible(uiVisible);
+        callingUserMiniFloatingLayout.setUiVisible(uiVisible);
+        currentUserCameraFloatingLayout.restoreRelativePosition();
+        callingUserMiniFloatingLayout.restoreRelativePosition();
     }
 
     private void showFloatingLayout(int state, boolean animated) {

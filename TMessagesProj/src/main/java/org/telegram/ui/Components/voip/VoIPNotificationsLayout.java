@@ -7,12 +7,12 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
-import android.transition.ChangeBounds;
-import android.transition.Fade;
-import android.transition.TransitionManager;
-import android.transition.TransitionSet;
-import android.transition.TransitionValues;
-import android.transition.Visibility;
+import androidx.transition.ChangeBounds;
+import androidx.transition.Fade;
+import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
+import androidx.transition.TransitionValues;
+import androidx.transition.Visibility;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -71,27 +71,11 @@ public class VoIPNotificationsLayout extends LinearLayout {
     private void init() {
         setOrientation(VERTICAL);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            transitionSet = new TransitionSet();
-            transitionSet.addTransition(new Fade(Fade.OUT).setDuration(150))
-                    .addTransition(new ChangeBounds().setDuration(200))
-                    .addTransition(new Visibility() {
-                        @Override
-                        public Animator onAppear(ViewGroup sceneRoot, View view, TransitionValues startValues, TransitionValues endValues) {
-                            AnimatorSet set = new AnimatorSet();
-                            view.setAlpha(0);
-                            set.playTogether(
-                                    ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1f),
-                                    ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, view.getMeasuredHeight(), 0)
-                            );
+        transitionSet = new TransitionSet();
+        transitionSet.addTransition(new Fade().setDuration(150))
+                .addTransition(new ChangeBounds().setDuration(200));
+        transitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
 
-                            set.setInterpolator(CubicBezierInterpolator.DEFAULT);
-
-                            return set;
-                        }
-                    }.setDuration(200));
-            transitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
-        }
     }
 
     public void addNotification(int iconRes, String text, String tag, boolean animated) {
@@ -143,11 +127,10 @@ public class VoIPNotificationsLayout extends LinearLayout {
         if (viewToAdd.isEmpty() && viewToRemove.isEmpty()) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            ViewParent parent = getParent();
-            if (parent != null) {
-                TransitionManager.beginDelayedTransition(this, transitionSet);
-            }
+
+        ViewParent parent = getParent();
+        if (parent != null) {
+            TransitionManager.beginDelayedTransition(this, transitionSet);
         }
 
         for (int i = 0; i < viewToAdd.size(); i++) {

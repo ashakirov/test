@@ -195,7 +195,7 @@ public class VoIPFloatingLayout extends FrameLayout {
     private void updatePadding() {
         leftPadding = AndroidUtilities.dp(16);
         rightPadding = AndroidUtilities.dp(16);
-        topPadding = uiVisible ? AndroidUtilities.dp(60) : AndroidUtilities.dp(16);
+        topPadding = AndroidUtilities.dp(16);
         bottomPadding = (uiVisible ? AndroidUtilities.dp(100) : AndroidUtilities.dp(16)) + bottomOffset;
     }
 
@@ -383,14 +383,13 @@ public class VoIPFloatingLayout extends FrameLayout {
                     .translationX(xPoint)
                     .translationY(yPoint)
                     .alpha(1f)
-                    .setStartDelay(0)
-                    .setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+                    .setStartDelay(0).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         } else {
             if (!alwaysFloating) {
                 animate().setListener(null).cancel();
                 setScaleX(1f);
                 setScaleY(1f);
-                animate().alpha(1f).setDuration(150).start();
+                animate().alpha(1f).start();
             }
             setTranslationX(xPoint);
             setTranslationY(yPoint);
