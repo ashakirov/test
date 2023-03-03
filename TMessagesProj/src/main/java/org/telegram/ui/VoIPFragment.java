@@ -28,6 +28,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,12 +36,10 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.FloatRange;
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
-import androidx.transition.Fade;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
 import androidx.transition.TransitionSet;
@@ -122,6 +121,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final int BG_GREEN_CIRCLE_DURATION = 500;
 
     private static final int BTN_OFF_COLOR = 0xED000000;
+    private final int ACCEPT_INNNER_RADIUS = AndroidUtilities.dp(30);
+    private final int ACCEPT_OUTER_RADIUS = AndroidUtilities.dp(36);
 
     Activity activity;
 
@@ -166,6 +167,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private ViewGroup acceptDeclineView;
     private TextView acceptCallText, declineCallText;
+    private AnimatorSet acceptCallBtnAnimation;
+
     private BlobView btnAcceptCallBlob;
     private View btnDeclineCall, btnAcceptCall;
     boolean isAcceptDeclineShowed = true;
@@ -439,6 +442,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     case VoIPService.STATE_ESTABLISHED:
                         if (isOutgoing) {
                             startGreenBGAnimation(callingUserPhoto);
+                        } else {
+                            acceptCallBtnAnimation.cancel();
                         }
                         break;
                 }
@@ -676,7 +681,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             onClickDeclineCall();
         });
         btnAcceptCallBlob = fragmentView.findViewById(R.id.acceptCallBlob);
-        btnAcceptCallBlob.init(AndroidUtilities.dp(38), AndroidUtilities.dp(48), AndroidUtilities.dp(3), 0x24ffffff, 0x14ffffff);
+        btnAcceptCallBlob.init(ACCEPT_INNNER_RADIUS, ACCEPT_OUTER_RADIUS, AndroidUtilities.dp(3), 0x24ffffff, 0x14ffffff);
 
         acceptCallText = fragmentView.findViewById(R.id.acceptCallText);
         acceptCallText.setText(LocaleController.getString("AcceptCall", R.string.AcceptCall));
@@ -740,7 +745,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         startAnimations();
-
+        if (!isOutgoing) {
+            animateAcceptCallButton();
+        }
         return fragmentView;
     }
 
@@ -2081,11 +2088,23 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private void stopAnimations() {
         timer.cancel();
+        if(acceptCallBtnAnimation != null){
+            acceptCallBtnAnimation.cancel();
+        }
     }
 
     private void setAnimationsPaused(boolean paused) {
         isAnimationsPaused = paused;
         mainBackgroundView.setAnimationRunning(!paused);
+        if(paused){
+            if(acceptCallBtnAnimation != null){
+                acceptCallBtnAnimation.pause();
+            }
+        } else{
+            if(acceptCallBtnAnimation != null && acceptCallBtnAnimation.isPaused()){
+                acceptCallBtnAnimation.resume();
+            }
+        }
     }
 
     private void tickAnimations() {
@@ -2141,4 +2160,42 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserPhotoBlobView.setOuterWaveRadius((int) (USER_PHOTO_BLOB_OUTER_RADIUS * (1 + 0.5f * micAmplitude)));
         }
     }
+
+    private void animateAcceptCallButton() {
+        if (acceptCallBtnAnimation != null) {
+            acceptCallBtnAnimation.cancel();
+        }
+        acceptCallBtnAnimation = new AnimatorSet();
+
+        ValueAnimator animator = ValueAnimator.ofInt(0, AndroidUtilities.dp(7), 0, AndroidUtilities.dp(6), 0);
+        animator.setDuration(1000);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.addUpdateListener(animation -> {
+            int progress = (int) animation.getAnimatedValue();
+            btnAcceptCallBlob.setInnerWaveRadius((int) (ACCEPT_INNNER_RADIUS + progress));
+            btnAcceptCallBlob.setOuterWaveRadius((int) (ACCEPT_OUTER_RADIUS + progress * 2));
+        });
+        ValueAnimator rotation = ValueAnimator.ofInt(0, -15, 10, -15, 10, 0);
+        rotation.setInterpolator(CubicBezierInterpolator.DEFAULT);
+        rotation.setDuration(1000);
+        rotation.setRepeatCount(ValueAnimator.INFINITE);
+        rotation.addUpdateListener(animation -> {
+            int progress = (int) animation.getAnimatedValue();
+            btnAcceptCall.setRotation(progress);
+        });
+        acceptCallBtnAnimation.playTogether(animator, rotation);
+        acceptCallBtnAnimation.start();
+        acceptCallBtnAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                btnAcceptCall.setRotation(0);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                btnAcceptCall.setRotation(0);
+            }
+        });
+    }
+
 }
