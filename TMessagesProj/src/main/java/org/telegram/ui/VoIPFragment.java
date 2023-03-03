@@ -118,7 +118,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private final int currentAccount;
     private final int BG_CHANGE_DURATION = 4000;
-    private final int BG_GREEN_CIRCLE_DURATION = 500;
+    private final int BG_GREEN_CIRCLE_DURATION = 800;
 
     private static final int BTN_OFF_COLOR = 0xED000000;
     private final int ACCEPT_INNNER_RADIUS = AndroidUtilities.dp(30);
