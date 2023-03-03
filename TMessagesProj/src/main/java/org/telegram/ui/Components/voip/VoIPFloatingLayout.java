@@ -155,7 +155,7 @@ public class VoIPFloatingLayout extends FrameLayout {
             });
             setClipToOutline(true);
         }
-        mutedPaint.setColor(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+        mutedPaint.setColor(ContextCompat.getColor(context, R.color.call_voip_tooltip_bg));
         mutedDrawable = ContextCompat.getDrawable(context, R.drawable.calls_mute_mini);
     }
 

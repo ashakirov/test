@@ -11,5 +11,5 @@
 
     <color name="call_btn_accept">#05BD32</color>
     <color name="call_btn_decline">#F21827</color>
-
+    <color name="call_voip_tooltip_bg">#30000000</color>
 </resources>
