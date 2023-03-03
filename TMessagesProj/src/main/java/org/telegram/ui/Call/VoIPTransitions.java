@@ -35,7 +35,7 @@ public class VoIPTransitions {
     private static final int BTN_CALL_DELTA_X = 40;
     private static final float BTN_CALL_MIN_SCALE = 0.7f;
     private static final int CALM_DOWN_WAVES_TIME = 3000;
-    private static final int EMOJI_SLIDE_Y_DELTA = -AndroidUtilities.dp(150) ;
+    private static final int EMOJI_SLIDE_Y_DELTA = -AndroidUtilities.dp(150);
 
     @NonNull
     public static TransitionSet emojiExpandTransition(boolean expanded, View btnHideEmoji, View emojiBackground, TextView emojiRationalTextView, TextView emojiEncriptionTextView, ImageView[] emojiViews, BlobView callingUserPhotoBlobView, BackupImageView callingUserPhoto, LinearLayout emojiLayout, ViewGroup emojiFrame, View statusLayout) {

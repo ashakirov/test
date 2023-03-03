@@ -1649,7 +1649,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             btnDeclineCall.setVisibility(View.VISIBLE);
             declineCallText.setVisibility(View.VISIBLE);
         } else {
-            if(!isOutgoing) {
+            if(!isOutgoing && (currentState == VoIPService.STATE_ESTABLISHED || currentState == VoIPService.STATE_EXCHANGING_KEYS)) {
                 startGreenBGAnimation(btnAcceptCall);
             }
             btnAcceptCallBlob.setVisibility(View.GONE);
