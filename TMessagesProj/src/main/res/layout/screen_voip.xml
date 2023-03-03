@@ -317,7 +317,7 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:padding="16dp"
-        android:src="@drawable/ic_ab_back"
+        android:src="@drawable/msg_call_minimize"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topInsetView" />
 
