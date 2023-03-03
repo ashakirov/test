@@ -733,6 +733,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         tapToVideoTooltip.init(4, false, null);
         tapToVideoTooltip.setText(LocaleController.getString("TapToTurnCamera", R.string.TapToTurnCamera));
         tapToVideoTooltip.setBottomOffset(AndroidUtilities.dp(4));
+        tapToVideoTooltip.setBackgroundColor(ContextCompat.getColor(context, R.color.call_voip_tooltip_bg), Color.WHITE);
 
         updateViewState();
 
