@@ -151,6 +151,7 @@ public class VoIpBackgroundView extends View {
 
         int maxRadius = (int) Math.sqrt(getWidth() * getWidth() + getHeight() * getHeight());
         ValueAnimator greenCircleAnimator = ValueAnimator.ofInt(0, maxRadius);
+        greenCircleAnimator.setDuration(700);
         greenCircleAnimator.setDuration(circleDuration);
         greenCircleAnimator.addUpdateListener(animation -> {
             greenCircleRadius = (int) animation.getAnimatedValue();
