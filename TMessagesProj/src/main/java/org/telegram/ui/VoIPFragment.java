@@ -1193,8 +1193,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserPhotoBlobView.setVisibility(View.GONE);
         } else {
             showShadowViews(false);
-            callingUserPhoto.setVisibility(View.VISIBLE);
-            callingUserPhotoBlobView.setVisibility(View.VISIBLE);
+            if (!emojiExpanded) {
+                callingUserPhoto.setVisibility(View.VISIBLE);
+                callingUserPhotoBlobView.setVisibility(View.VISIBLE);
+            }
             if (animated) {
                 callingUserTextureView.animate().alpha(0f).setDuration(250).start();
             } else {
