@@ -224,8 +224,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
 
             showUi(false);
-            previousState = currentState;
-            updateViewState();
         }
     };
     private boolean lockOnScreen;
@@ -523,7 +521,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
         updateViewState();
 
-        if (videoState == Instance.VIDEO_STATE_INACTIVE && !uiVisible) {
+        if (!currentUserIsVideo && videoState == Instance.VIDEO_STATE_INACTIVE && !uiVisible) {
             showUi(true);
         }
     }
@@ -1212,7 +1210,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         }
 
         if (currentUserIsVideo || callingUserIsVideo) {
-            showShadowViews(true);
+            if (uiVisible) {
+                showShadowViews(true);
+            }
             callingUserPhoto.setVisibility(View.GONE);
             callingUserPhotoBlobView.setVisibility(View.GONE);
         } else {
