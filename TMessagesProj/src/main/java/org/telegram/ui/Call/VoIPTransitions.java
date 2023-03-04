@@ -174,7 +174,7 @@ public class VoIPTransitions {
         return set;
     }
 
-    public static TransitionSet getShowUITransition(ImageView speakerPhoneIcon1, ImageView backIcon1, LinearLayout statusLayout1, VoIPButtonsLayout buttonsLayout1, LinearLayout emojiLayout1, VoIPNotificationsLayout notificationsLayout1, VoIPNotificationsLayout notificationsLayout2) {
+    public static TransitionSet getShowUITransition(ImageView speakerPhoneIcon1, ImageView backIcon1, LinearLayout statusLayout1, VoIPButtonsLayout buttonsLayout1, LinearLayout emojiLayout1, VoIPNotificationsLayout notificationsLayout1) {
         TransitionSet set = new TransitionSet();
         set.setOrdering(TransitionSet.ORDERING_TOGETHER);
         Fade fade = new Fade();
@@ -183,11 +183,10 @@ public class VoIPTransitions {
         fade.addTarget(statusLayout1);
         fade.addTarget(buttonsLayout1);
         fade.addTarget(emojiLayout1);
-        fade.addTarget(notificationsLayout1);
         set.addTransition(fade);
 
         ChangeBounds changeBounds = new ChangeBounds();
-        changeBounds.addTarget(notificationsLayout2);
+        changeBounds.addTarget(notificationsLayout1);
         set.addTransition(changeBounds);
         set.setInterpolator(CubicBezierInterpolator.DEFAULT);
 

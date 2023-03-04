@@ -1263,9 +1263,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             currentUserTextureView.renderer.setMirror(service.isFrontFaceCamera());
             service.setSinks(currentUserIsVideo && !service.isScreencast() ? currentUserTextureView.renderer : null, showCallingUserVideoMini ? callingUserMiniTextureRenderer : callingUserTextureView.renderer);
 
-            if (animated) {
-                notificationsLayout.beforeLayoutChanges();
-            }
             if ((currentUserIsVideo || callingUserIsVideo) && (currentState == VoIPService.STATE_ESTABLISHED || currentState == VoIPService.STATE_RECONNECTING) && service.getCallDuration() > 500) {
                 if (service.getRemoteAudioState() == Instance.AUDIO_STATE_MUTED) {
                     notificationsLayout.addNotification(R.drawable.calls_mute_mini, LocaleController.formatString("VoipUserMicrophoneIsOff", R.string.VoipUserMicrophoneIsOff, UserObject.getFirstName(callingUser)), "muted", animated);
@@ -1291,10 +1288,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 tapToVideoTooltip.showForView(bottomButtons[1], true);
             } else if (notificationsLayout.getChildCount() != 0) {
                 tapToVideoTooltip.hide();
-            }
-
-            if (animated) {
-                notificationsLayout.animateLayoutChanges();
             }
         }
 

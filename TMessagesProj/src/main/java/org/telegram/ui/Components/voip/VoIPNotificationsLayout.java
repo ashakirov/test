@@ -159,25 +159,6 @@ public class VoIPNotificationsLayout extends LinearLayout {
         }
     }
 
-    public void beforeLayoutChanges() {
-        wasChanged = false;
-        if (!lockAnimation) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                ViewParent parent = getParent();
-                if (parent != null) {
-                    TransitionManager.beginDelayedTransition(this, transitionSet);
-                }
-            }
-        }
-    }
-
-    public void animateLayoutChanges() {
-        if (wasChanged) {
-            lock();
-        }
-        wasChanged = false;
-    }
-
     public int getChildsHight() {
         int n = getChildCount();
         return (n > 0 ? AndroidUtilities.dp(16) : 0) + n * AndroidUtilities.dp(32);
@@ -207,7 +188,6 @@ public class VoIPNotificationsLayout extends LinearLayout {
         public void startAnimation() {
             textView.setVisibility(View.GONE);
             postDelayed(() -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     TransitionSet transitionSet = new TransitionSet();
                     transitionSet.
                             addTransition(new Fade(Fade.IN).setDuration(150))
@@ -217,7 +197,6 @@ public class VoIPNotificationsLayout extends LinearLayout {
                     if (parent != null) {
                         TransitionManager.beginDelayedTransition((ViewGroup) parent, transitionSet);
                     }
-                }
 
                 textView.setVisibility(View.VISIBLE);
             }, 400);
