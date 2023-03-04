@@ -161,8 +161,8 @@ public class VoIPWindowView extends FrameLayout {
 
     public void startEnterTransition() {
         if (!lockOnScreen) {
-            setTranslationX(getMeasuredWidth());
-            animate().translationX(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+            setTranslationY(getMeasuredHeight());
+            animate().translationY(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         }
     }
 
