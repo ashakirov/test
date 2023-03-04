@@ -1,5 +1,9 @@
 package org.telegram.ui.Call;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -174,19 +178,24 @@ public class VoIPTransitions {
         return set;
     }
 
-    public static TransitionSet getShowUITransition(ImageView speakerPhoneIcon1, ImageView backIcon1, LinearLayout statusLayout1, VoIPButtonsLayout buttonsLayout1, LinearLayout emojiLayout1, VoIPNotificationsLayout notificationsLayout1) {
+    public static TransitionSet getShowUITransition(ImageView speakerPhoneIcon,
+                                                    ImageView backIcon,
+                                                    LinearLayout statusLayout,
+                                                    VoIPButtonsLayout buttonsLayout,
+                                                    LinearLayout emojiLayout,
+                                                    VoIPNotificationsLayout notificationsLayout) {
         TransitionSet set = new TransitionSet();
         set.setOrdering(TransitionSet.ORDERING_TOGETHER);
         Fade fade = new Fade();
-        fade.addTarget(speakerPhoneIcon1);
-        fade.addTarget(backIcon1);
-        fade.addTarget(statusLayout1);
-        fade.addTarget(buttonsLayout1);
-        fade.addTarget(emojiLayout1);
+        fade.addTarget(speakerPhoneIcon);
+        fade.addTarget(backIcon);
+        fade.addTarget(statusLayout);
+        fade.addTarget(buttonsLayout);
+        fade.addTarget(emojiLayout);
         set.addTransition(fade);
 
         ChangeBounds changeBounds = new ChangeBounds();
-        changeBounds.addTarget(notificationsLayout1);
+        changeBounds.addTarget(notificationsLayout);
         set.addTransition(changeBounds);
         set.setInterpolator(CubicBezierInterpolator.DEFAULT);
 
@@ -204,6 +213,41 @@ public class VoIPTransitions {
         for (VoIPToggleButton button : bottomButtons) {
             set.addTarget(button);
         }
+        return set;
+    }
+
+    public static AnimatorSet createAcceptCallButtonAnimation(BlobView blobView, final View callButton, int innerRadius, int outerRadius) {
+        AnimatorSet set = new AnimatorSet();
+
+        ValueAnimator zoomWaves = ValueAnimator.ofInt(0, AndroidUtilities.dp(7), 0, AndroidUtilities.dp(6), 0);
+        zoomWaves.setDuration(1000);
+        zoomWaves.setRepeatCount(ValueAnimator.INFINITE);
+        zoomWaves.addUpdateListener(animation -> {
+            int progress = (int) animation.getAnimatedValue();
+            blobView.setInnerWaveRadius((int) (innerRadius + progress));
+            blobView.setOuterWaveRadius((int) (outerRadius + progress * 2));
+        });
+        ValueAnimator rotation = ValueAnimator.ofInt(0, -15, 10, -15, 10, 0);
+        rotation.setInterpolator(CubicBezierInterpolator.DEFAULT);
+        rotation.setDuration(1000);
+        rotation.setRepeatCount(ValueAnimator.INFINITE);
+        rotation.addUpdateListener(animation -> {
+            int progress = (int) animation.getAnimatedValue();
+            callButton.setRotation(progress);
+        });
+        set.playTogether(zoomWaves, rotation);
+        set.start();
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                callButton.setRotation(0);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                callButton.setRotation(0);
+            }
+        });
         return set;
     }
 }

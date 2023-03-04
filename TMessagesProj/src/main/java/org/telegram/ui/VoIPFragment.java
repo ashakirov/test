@@ -565,7 +565,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                         expandEmoji(false);
                     } else if (!uiVisible) {
                         showUi(true);
-                    } else if(canHideUI()){
+                    } else if (canHideUI()) {
                         showUi(false);
                     }
                 }
@@ -1338,9 +1338,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             notificationsLayout.removeNotification("video");
         }
 
-        if(notificationBefore != notificationsLayout.getChildCount()) {
+        if (notificationBefore != notificationsLayout.getChildCount()) {
             moveFloatingLayouts();
-        } else{
+        } else {
             currentUserCameraFloatingLayout.savedRelativePositionX = -1f;
             currentUserCameraFloatingLayout.savedRelativePositionY = -1f;
             callingUserMiniFloatingLayout.savedRelativePositionX = -1f;
@@ -1444,7 +1444,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             buttonsLayout.setVisibility(View.VISIBLE);
             emojiLayout.setVisibility(View.VISIBLE);
 
-            if(currentUserIsVideo || callingUserIsVideo) {
+            if (currentUserIsVideo || callingUserIsVideo) {
                 showShadowViews(show);
             }
         } else {
@@ -1688,7 +1688,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             btnDeclineCall.setVisibility(View.VISIBLE);
             declineCallText.setVisibility(View.VISIBLE);
         } else {
-            if(!isOutgoing && (currentState == VoIPService.STATE_ESTABLISHED || currentState == VoIPService.STATE_EXCHANGING_KEYS)) {
+            if (!isOutgoing && (currentState == VoIPService.STATE_ESTABLISHED || currentState == VoIPService.STATE_EXCHANGING_KEYS)) {
                 startGreenBGAnimation(btnAcceptCall);
             }
             btnAcceptCallBlob.setVisibility(View.GONE);
@@ -2120,7 +2120,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private void stopAnimations() {
         timer.cancel();
-        if(acceptCallBtnAnimation != null){
+        if (acceptCallBtnAnimation != null) {
             acceptCallBtnAnimation.cancel();
         }
     }
@@ -2128,12 +2128,12 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private void setAnimationsPaused(boolean paused) {
         isAnimationsPaused = paused;
         mainBackgroundView.setAnimationRunning(!paused);
-        if(paused){
-            if(acceptCallBtnAnimation != null){
+        if (paused) {
+            if (acceptCallBtnAnimation != null) {
                 acceptCallBtnAnimation.pause();
             }
-        } else{
-            if(acceptCallBtnAnimation != null && acceptCallBtnAnimation.isPaused()){
+        } else {
+            if (acceptCallBtnAnimation != null && acceptCallBtnAnimation.isPaused()) {
                 acceptCallBtnAnimation.resume();
             }
         }
@@ -2197,37 +2197,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         if (acceptCallBtnAnimation != null) {
             acceptCallBtnAnimation.cancel();
         }
-        acceptCallBtnAnimation = new AnimatorSet();
-
-        ValueAnimator animator = ValueAnimator.ofInt(0, AndroidUtilities.dp(7), 0, AndroidUtilities.dp(6), 0);
-        animator.setDuration(1000);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.addUpdateListener(animation -> {
-            int progress = (int) animation.getAnimatedValue();
-            btnAcceptCallBlob.setInnerWaveRadius((int) (ACCEPT_INNNER_RADIUS + progress));
-            btnAcceptCallBlob.setOuterWaveRadius((int) (ACCEPT_OUTER_RADIUS + progress * 2));
-        });
-        ValueAnimator rotation = ValueAnimator.ofInt(0, -15, 10, -15, 10, 0);
-        rotation.setInterpolator(CubicBezierInterpolator.DEFAULT);
-        rotation.setDuration(1000);
-        rotation.setRepeatCount(ValueAnimator.INFINITE);
-        rotation.addUpdateListener(animation -> {
-            int progress = (int) animation.getAnimatedValue();
-            btnAcceptCall.setRotation(progress);
-        });
-        acceptCallBtnAnimation.playTogether(animator, rotation);
-        acceptCallBtnAnimation.start();
-        acceptCallBtnAnimation.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                btnAcceptCall.setRotation(0);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                btnAcceptCall.setRotation(0);
-            }
-        });
+        acceptCallBtnAnimation = VoIPTransitions.createAcceptCallButtonAnimation(btnAcceptCallBlob, btnAcceptCall, ACCEPT_INNNER_RADIUS, ACCEPT_OUTER_RADIUS);
     }
 
 }
