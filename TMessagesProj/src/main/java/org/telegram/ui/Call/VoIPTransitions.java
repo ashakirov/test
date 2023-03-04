@@ -42,10 +42,22 @@ public class VoIPTransitions {
     private static final int EMOJI_SLIDE_Y_DELTA = -AndroidUtilities.dp(150);
 
     @NonNull
-    public static TransitionSet emojiExpandTransition(boolean expanded, View btnHideEmoji, View emojiBackground, TextView emojiRationalTextView, TextView emojiEncriptionTextView, ImageView[] emojiViews, BlobView callingUserPhotoBlobView, BackupImageView callingUserPhoto, LinearLayout emojiLayout, ViewGroup emojiFrame, View statusLayout) {
+    public static TransitionSet emojiExpandTransition(boolean expanded,
+                                                      View btnHideEmoji,
+                                                      View emojiBackground,
+                                                      TextView emojiRationalTextView,
+                                                      TextView emojiEncriptionTextView,
+                                                      ImageView[] emojiViews,
+                                                      BlobView callingUserPhotoBlobView,
+                                                      BackupImageView callingUserPhoto,
+                                                      LinearLayout emojiLayout,
+                                                      ViewGroup emojiFrame,
+                                                      View statusLayout,
+                                                      View tapToEmojiHint) {
         TransitionSet set = new TransitionSet();
         Fade btnHideEmojiFade = new Fade();
         btnHideEmojiFade.addTarget(btnHideEmoji);
+        btnHideEmojiFade.addTarget(tapToEmojiHint);
         set.addTransition(btnHideEmojiFade);
 
         TransitionSet bgSet = new TransitionSet();
@@ -183,7 +195,8 @@ public class VoIPTransitions {
                                                     LinearLayout statusLayout,
                                                     VoIPButtonsLayout buttonsLayout,
                                                     LinearLayout emojiLayout,
-                                                    VoIPNotificationsLayout notificationsLayout) {
+                                                    VoIPNotificationsLayout notificationsLayout,
+                                                    View tapToEmojiHint) {
         TransitionSet set = new TransitionSet();
         set.setOrdering(TransitionSet.ORDERING_TOGETHER);
         Fade fade = new Fade();
@@ -192,6 +205,7 @@ public class VoIPTransitions {
         fade.addTarget(statusLayout);
         fade.addTarget(buttonsLayout);
         fade.addTarget(emojiLayout);
+        fade.addTarget(tapToEmojiHint);
         set.addTransition(fade);
 
         ChangeBounds changeBounds = new ChangeBounds();
@@ -213,6 +227,16 @@ public class VoIPTransitions {
         for (VoIPToggleButton button : bottomButtons) {
             set.addTarget(button);
         }
+        return set;
+    }
+
+    @NonNull
+    public static TransitionSet getShowEmojiHintTransition(View tapToEmojiHint) {
+        TransitionSet set = new TransitionSet();
+        set.addTransition(new Fade());
+        set.addTransition(new Slide(-AndroidUtilities.dp(20), 0));
+        set.addTransition(new Scale(0.4f, true));
+        set.addTarget(tapToEmojiHint);
         return set;
     }
 
