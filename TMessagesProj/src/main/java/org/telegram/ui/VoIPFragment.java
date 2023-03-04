@@ -1263,25 +1263,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             currentUserTextureView.renderer.setMirror(service.isFrontFaceCamera());
             service.setSinks(currentUserIsVideo && !service.isScreencast() ? currentUserTextureView.renderer : null, showCallingUserVideoMini ? callingUserMiniTextureRenderer : callingUserTextureView.renderer);
 
-            if ((currentUserIsVideo || callingUserIsVideo) && (currentState == VoIPService.STATE_ESTABLISHED || currentState == VoIPService.STATE_RECONNECTING) && service.getCallDuration() > 500) {
-                if (service.getRemoteAudioState() == Instance.AUDIO_STATE_MUTED) {
-                    notificationsLayout.addNotification(R.drawable.calls_mute_mini, LocaleController.formatString("VoipUserMicrophoneIsOff", R.string.VoipUserMicrophoneIsOff, UserObject.getFirstName(callingUser)), "muted", animated);
-                } else {
-                    notificationsLayout.removeNotification("muted");
-                }
-                if (service.getRemoteVideoState() == Instance.VIDEO_STATE_INACTIVE) {
-                    notificationsLayout.addNotification(R.drawable.calls_camera_mini, LocaleController.formatString("VoipUserCameraIsOff", R.string.VoipUserCameraIsOff, UserObject.getFirstName(callingUser)), "video", animated);
-                } else {
-                    notificationsLayout.removeNotification("video");
-                }
-            } else {
-                if (service.getRemoteAudioState() == Instance.AUDIO_STATE_MUTED) {
-                    notificationsLayout.addNotification(R.drawable.calls_mute_mini, LocaleController.formatString("VoipUserMicrophoneIsOff", R.string.VoipUserMicrophoneIsOff, UserObject.getFirstName(callingUser)), "muted", animated);
-                } else {
-                    notificationsLayout.removeNotification("muted");
-                }
-                notificationsLayout.removeNotification("video");
-            }
+            updateNotificationLayoutViews(animated, service);
 
             if (notificationsLayout.getChildCount() == 0 && callingUserIsVideo && service.privateCall != null && !service.privateCall.video && !service.sharedUIParams.tapToVideoTooltipWasShowed) {
                 service.sharedUIParams.tapToVideoTooltipWasShowed = true;
@@ -1290,8 +1272,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 tapToVideoTooltip.hide();
             }
         }
-
-        moveFloatingLayouts();
 
         if (currentUserIsVideo) {
             if (!callingUserIsVideo || cameraForceExpanded) {
@@ -1331,6 +1311,41 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserMiniFloatingLayout.restoreRelativePosition();
 
         updateSpeakerPhoneIcon();
+    }
+
+    private void updateNotificationLayoutViews(boolean animated, VoIPService service) {
+        currentUserCameraFloatingLayout.saveRelativePosition();
+        callingUserMiniFloatingLayout.saveRelativePosition();
+
+        int notificationBefore = notificationsLayout.getChildCount();
+        if ((currentUserIsVideo || callingUserIsVideo) && (currentState == VoIPService.STATE_ESTABLISHED || currentState == VoIPService.STATE_RECONNECTING) && service.getCallDuration() > 500) {
+            if (service.getRemoteAudioState() == Instance.AUDIO_STATE_MUTED) {
+                notificationsLayout.addNotification(R.drawable.calls_mute_mini, LocaleController.formatString("VoipUserMicrophoneIsOff", R.string.VoipUserMicrophoneIsOff, UserObject.getFirstName(callingUser)), "muted", animated);
+            } else {
+                notificationsLayout.removeNotification("muted");
+            }
+            if (service.getRemoteVideoState() == Instance.VIDEO_STATE_INACTIVE) {
+                notificationsLayout.addNotification(R.drawable.calls_camera_mini, LocaleController.formatString("VoipUserCameraIsOff", R.string.VoipUserCameraIsOff, UserObject.getFirstName(callingUser)), "video", animated);
+            } else {
+                notificationsLayout.removeNotification("video");
+            }
+        } else {
+            if (service.getRemoteAudioState() == Instance.AUDIO_STATE_MUTED) {
+                notificationsLayout.addNotification(R.drawable.calls_mute_mini, LocaleController.formatString("VoipUserMicrophoneIsOff", R.string.VoipUserMicrophoneIsOff, UserObject.getFirstName(callingUser)), "muted", animated);
+            } else {
+                notificationsLayout.removeNotification("muted");
+            }
+            notificationsLayout.removeNotification("video");
+        }
+
+        if(notificationBefore != notificationsLayout.getChildCount()) {
+            moveFloatingLayouts();
+        } else{
+            currentUserCameraFloatingLayout.savedRelativePositionX = -1f;
+            currentUserCameraFloatingLayout.savedRelativePositionY = -1f;
+            callingUserMiniFloatingLayout.savedRelativePositionX = -1f;
+            callingUserMiniFloatingLayout.savedRelativePositionY = -1f;
+        }
     }
 
     private boolean canHideUI() {
@@ -1417,6 +1432,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         set.addTransition(VoIPTransitions.getShowShadowsTransition(fragmentView, bottomShadow, topShadow));
         TransitionManager.beginDelayedTransition(fragmentView, set);
 
+        currentUserCameraFloatingLayout.saveRelativePosition();
+        callingUserMiniFloatingLayout.saveRelativePosition();
+
         if (show) {
             tapToVideoTooltip.hide();
 
@@ -1462,8 +1480,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     }
 
     private void moveFloatingLayouts() {
-        currentUserCameraFloatingLayout.saveRelativePosition();
-        callingUserMiniFloatingLayout.saveRelativePosition();
         callingUserMiniFloatingLayout.setBottomOffset(notificationsLayout.getChildsHight(), true);
         currentUserCameraFloatingLayout.setBottomOffset(notificationsLayout.getChildsHight(), true);
         currentUserCameraFloatingLayout.setUiVisible(uiVisible);
