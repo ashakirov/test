@@ -20,6 +20,7 @@ import android.os.PowerManager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.View.OnClickListener;
@@ -28,7 +29,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -123,6 +123,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private static final int BTN_OFF_COLOR = 0xED000000;
     private final int ACCEPT_INNNER_RADIUS = AndroidUtilities.dp(30);
     private final int ACCEPT_OUTER_RADIUS = AndroidUtilities.dp(36);
+    private final int AUTO_HIDE_DELAY = 3000;
 
     Activity activity;
 
@@ -191,13 +192,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     private static VoIPFragment instance;
     private VoIPWindowView windowView;
-//    private int statusLayoutAnimateToOffset;
 
     private AccessibilityManager accessibilityManager;
 
     private boolean uiVisible = true;
-    float uiVisibilityAlpha = 1f;
-    private boolean canHideUI;
     private Animator cameraShowingAnimator;
     private boolean emojiLoaded;
     private boolean emojiExpanded;
@@ -217,11 +215,14 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
     HintView tapToVideoTooltip;
 
-    boolean hideUiRunnableWaiting;
     Runnable hideUIRunnable = () -> {
-        hideUiRunnableWaiting = false;
-        if (canHideUI && uiVisible && !emojiExpanded) {
+        if (canHideUI()) {
             lastContentTapTime = System.currentTimeMillis();
+
+            if (emojiExpanded) {
+                expandEmoji(false);
+            }
+
             showUi(false);
             previousState = currentState;
             updateViewState();
@@ -260,6 +261,19 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         fragment.activity = activity;
         instance = fragment;
         VoIPWindowView windowView = new VoIPWindowView(activity, !transitionFromPip) {
+            long lastMoveTime = System.currentTimeMillis();
+
+            @Override
+            public boolean dispatchTouchEvent(MotionEvent ev) {
+                if (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_UP) {
+                    fragment.hideUIDelayed();
+                } else if (ev.getAction() == MotionEvent.ACTION_MOVE && (System.currentTimeMillis() - lastMoveTime) > fragment.AUTO_HIDE_DELAY - 200) {
+                    lastMoveTime = System.currentTimeMillis();
+                    fragment.hideUIDelayed();
+                }
+                return super.dispatchTouchEvent(ev);
+            }
+
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
                 if (fragment.isFinished || fragment.switchingToPip) {
@@ -508,6 +522,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             isVideoCall = true;
         }
         updateViewState();
+
+        if (videoState == Instance.VIDEO_STATE_INACTIVE && !uiVisible) {
+            showUi(true);
+        }
     }
 
     @Override
@@ -547,8 +565,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     lastContentTapTime = System.currentTimeMillis();
                     if (emojiExpanded) {
                         expandEmoji(false);
-                    } else if (canHideUI) {
-                        showUi(!uiVisible);
+                    } else if (!uiVisible) {
+                        showUi(true);
+                    } else if(canHideUI()){
+                        showUi(false);
                     }
                 }
             }
@@ -580,8 +600,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         currentUserCameraFloatingLayout.setRelativePosition(1f, 1f);
         currentUserCameraFloatingLayout.setOnTapListener(view -> {
             if (currentUserIsVideo && callingUserIsVideo && System.currentTimeMillis() - lastContentTapTime > 500) {
-                AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
-                hideUiRunnableWaiting = false;
                 lastContentTapTime = System.currentTimeMillis();
                 callingUserMiniFloatingLayout.setRelativePosition(currentUserCameraFloatingLayout);
                 currentUserCameraIsFullscreen = true;
@@ -609,8 +627,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         callingUserMiniFloatingLayout.setOnTapListener(view -> {
             if (cameraForceExpanded && System.currentTimeMillis() - lastContentTapTime > 500) {
-                AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
-                hideUiRunnableWaiting = false;
                 lastContentTapTime = System.currentTimeMillis();
                 currentUserCameraFloatingLayout.setRelativePosition(callingUserMiniFloatingLayout);
                 currentUserCameraIsFullscreen = false;
@@ -1222,17 +1238,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         showCallingUserAvatarMini(showCallingAvatarMini, animated);
         showAcceptDeclineView(showAcceptDeclineView);
         windowView.setLockOnScreen(lockOnScreen || deviceIsLocked);
-        canHideUI = (currentState == VoIPService.STATE_ESTABLISHED) && (currentUserIsVideo || callingUserIsVideo);
-        if (!canHideUI && !uiVisible) {
-            showUi(true);
-        }
 
-        if (uiVisible && canHideUI && !hideUiRunnableWaiting && service != null && !service.isMicMute()) {
-            AndroidUtilities.runOnUIThread(hideUIRunnable, 3000);
-            hideUiRunnableWaiting = true;
-        } else if (service != null && service.isMicMute()) {
-            AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
-            hideUiRunnableWaiting = false;
+        if (canHideUI()) {
+            hideUIDelayed();
         }
 
         if (currentState != VoIPService.STATE_HANGING_UP && currentState != VoIPService.STATE_ENDED) {
@@ -1332,6 +1340,18 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         updateSpeakerPhoneIcon();
     }
 
+    private boolean canHideUI() {
+        VoIPService service = VoIPService.getSharedInstance();
+        return currentState == VoIPService.STATE_ESTABLISHED &&
+                (currentUserIsVideo || callingUserIsVideo) &&
+                uiVisible && service != null && !service.isMicMute();
+    }
+
+    private void hideUIDelayed() {
+        AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+        AndroidUtilities.runOnUIThread(hideUIRunnable, AUTO_HIDE_DELAY);
+    }
+
     private void processVoIPServiceError() {
         final VoIPService voipService = VoIPService.getSharedInstance();
         final String lastError = voipService != null ? voipService.getLastError() : Instance.ERROR_UNKNOWN;
@@ -1400,7 +1420,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     }
 
     private void showUi(boolean show) {
-        TransitionSet set = VoIPTransitions.getShowUITransition(speakerPhoneIcon, backIcon, statusLayout, buttonsLayout, emojiLayout, notificationsLayout, notificationsLayout);
+        TransitionSet set = VoIPTransitions.getShowUITransition(speakerPhoneIcon, backIcon, statusLayout, buttonsLayout, emojiLayout, notificationsLayout);
         set.addTransition(VoIPTransitions.getShowShadowsTransition(fragmentView, bottomShadow, topShadow));
         TransitionManager.beginDelayedTransition(fragmentView, set);
 
@@ -1412,6 +1432,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             statusLayout.setVisibility(View.VISIBLE);
             buttonsLayout.setVisibility(View.VISIBLE);
             emojiLayout.setVisibility(View.VISIBLE);
+
+            if(currentUserIsVideo || callingUserIsVideo) {
+                showShadowViews(show);
+            }
         } else {
             speakerPhoneIcon.setVisibility(View.GONE);
             backIcon.setVisibility(View.GONE);
@@ -1419,10 +1443,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             buttonsLayout.setVisibility(View.GONE);
             emojiLayout.setVisibility(View.GONE);
 
-            AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
-            hideUiRunnableWaiting = false;
+            showShadowViews(false);
         }
-        showShadowViews(show);
 
         buttonsLayout.setEnabled(show);
 
