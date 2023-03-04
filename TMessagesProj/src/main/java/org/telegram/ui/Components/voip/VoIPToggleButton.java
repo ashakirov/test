@@ -29,7 +29,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
 
 public class VoIPToggleButton extends FrameLayout {
 
@@ -77,11 +76,10 @@ public class VoIPToggleButton extends FrameLayout {
     private float radius;
     private ValueAnimator checkAnimator;
 
-    private RLottieImageView lottieImageView;
-
     public VoIPToggleButton(@NonNull Context context) {
         this(context, 52f);
     }
+
     public VoIPToggleButton(@NonNull Context context, float radius) {
         super(context);
         this.radius = radius;

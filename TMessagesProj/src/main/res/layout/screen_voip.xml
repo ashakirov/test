@@ -272,6 +272,7 @@
             android:foreground="@drawable/white_circle_ripple"
             android:padding="12dp"
             android:src="@drawable/ic_call"
+            android:stateListAnimator="@drawable/voip_button_touch_animator"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -297,6 +298,7 @@
             android:foreground="@drawable/white_circle_ripple"
             android:padding="11dp"
             android:src="@drawable/calls_decline"
+            android:stateListAnimator="@drawable/voip_button_touch_animator"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

@@ -2,9 +2,11 @@ package org.telegram.ui;
 
 import android.Manifest;
 import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.StateListAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -694,6 +696,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         buttonsLayout = fragmentView.findViewById(R.id.buttonsLayout);
         for (int i = 0; i < 4; i++) {
             bottomButtons[i] = new VoIPToggleButton(context);
+            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                bottomButtons[i].setStateListAnimator(AnimatorInflater.loadStateListAnimator(context,
+                        R.drawable.voip_button_touch_animator));
+            }
             buttonsLayout.addView(bottomButtons[i]);
         }
         btnAcceptCall = fragmentView.findViewById(R.id.acceptCall);
